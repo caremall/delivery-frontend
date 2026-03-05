@@ -317,7 +317,7 @@ export default function ShippedOrdersPage() {
         <div className="flex flex-col min-h-screen bg-[#f9fafb] p-6 lg:p-8 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-semibold text-gray-800 tracking-tight">Shipped Orders</h1>
+                    <h1 className="text-lg font-bold text-gray-800 tracking-tight">Shipped Orders</h1>
                     <p className="text-[12px] text-gray-400 mt-0.5">Orders currently in transit or out for delivery</p>
                 </div>
                 {orders.length > 0 && (

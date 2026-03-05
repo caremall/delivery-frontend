@@ -99,7 +99,7 @@ export function Sidebar({
               : "justify-start gap-3",
             isActive &&
             "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200",
-            !isActive && "hover:bg-gray-100"
+            !isActive && "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
           )}
           title={isCollapsed && !isMobile ? item.name : undefined}
           onClick={() => {
@@ -138,7 +138,7 @@ export function Sidebar({
                     "w-full h-9 justify-start gap-3 text-sm transition-colors cursor-pointer",
                     childActive &&
                     "bg-red-50 text-red-600 hover:bg-red-100 border border-red-200",
-                    !childActive && "hover:bg-gray-100 text-gray-600"
+                    !childActive && "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
                   )}
                   onClick={() => handleNavigation(child, isMobile)}
                 >
@@ -227,7 +227,7 @@ export function Sidebar({
             <Button
               onClick={handleLogout}
               variant="ghost"
-              className="w-full justify-start gap-3 h-10 text-gray-700 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+              className="w-full justify-start gap-3 h-10 text-gray-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
             >
               <LogOut className="h-4 w-4" />
               {!isCollapsed && "Logout"}
@@ -292,7 +292,7 @@ export function Sidebar({
             <Button
               onClick={handleLogout}
               variant="ghost"
-              className="w-full justify-start gap-3 h-10 text-gray-700 hover:text-red-600 hover:bg-red-50 cursor-pointer"
+              className="w-full justify-start gap-3 h-10 text-gray-500 hover:text-red-600 hover:bg-red-50 cursor-pointer"
             >
               <LogOut className="h-4 w-4" />
               Logout

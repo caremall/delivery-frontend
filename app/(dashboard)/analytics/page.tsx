@@ -12,27 +12,44 @@ import { TrendingUp, Users, ShoppingCart, IndianRupee, Loader2, Package } from '
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
-const COLORS = ['#ef4444', '#f97316', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899'];
+const COLORS = ['#818cf8', '#60a5fa', '#34d399', '#fbbf24', '#f472b6', '#a78bfa']; // Indigo, Blue, Emerald, Amber, Pink, Purple (Lighter 400/500 shades)
 
-const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
-    <Card className="border border-gray-100 shadow-sm overflow-hidden group hover:scale-[1.02] transition-transform">
-        <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-                    <h3 className="text-2xl font-extrabold text-gray-900">{value}</h3>
-                    {trend && (
-                        <p className={cn("text-[10px] font-medium mt-1", trend.startsWith('+') ? "text-green-500" : "text-red-500")}>
-                            {trend} from last month
-                        </p>
-                    )}
-                </div>
-                <div className={cn("p-3 rounded-2xl", color)}>
-                    <Icon className="h-6 w-6 text-white" />
-                </div>
+const StatCard = ({ title, value, icon: Icon, iconBg, iconColor, accentColor, trend }: any) => (
+    <div
+        className={cn(
+            "bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 relative overflow-hidden group",
+            "hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default"
+        )}
+    >
+        <div
+            className={cn(
+                "absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-300 group-hover:h-1",
+                accentColor
+            )}
+        />
+
+        <div className="flex items-start justify-between">
+            <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">
+                {title}
+            </span>
+            <div className={cn("p-2 rounded-xl", iconBg)}>
+                <Icon className={cn("h-4 w-4", iconColor)} />
             </div>
-        </CardContent>
-    </Card>
+        </div>
+
+        <div className="flex flex-col gap-1">
+            <h3 className="text-[22px] font-bold text-gray-900 tracking-tight">
+                {value}
+            </h3>
+            {trend && (
+                <p className={cn("text-[10px] font-medium",
+                    trend.startsWith('+') ? "text-emerald-500" : "text-gray-400"
+                )}>
+                    {trend} from last month
+                </p>
+            )}
+        </div>
+    </div>
 );
 
 export default function AnalyticsPage() {
@@ -65,9 +82,9 @@ export default function AnalyticsPage() {
 
     return (
         <div className="p-6 lg:p-10 space-y-8 bg-[#fcfcfc] min-h-screen">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Analytics Overview</h1>
-                <p className="text-sm text-gray-500 font-medium">Deep dive into your hub performance and rider efficiency.</p>
+            <div className="flex flex-col">
+                <h1 className="text-lg font-bold text-gray-800 tracking-tight">Analytics Overview</h1>
+                <p className="text-[12px] text-gray-400 mt-0.5">Deep dive into your hub performance and rider efficiency</p>
             </div>
 
             {/* Summary Cards */}
@@ -76,28 +93,36 @@ export default function AnalyticsPage() {
                     title="30D Revenue"
                     value={`₹${stats?.trends?.reduce((acc: number, curr: any) => acc + curr.revenue, 0).toLocaleString()}`}
                     icon={IndianRupee}
-                    color="bg-red-500"
+                    iconBg="bg-indigo-50"
+                    iconColor="text-indigo-500"
+                    accentColor="bg-indigo-400"
                     trend="+12.5%"
                 />
                 <StatCard
                     title="30D Orders"
                     value={stats?.trends?.reduce((acc: number, curr: any) => acc + curr.orders, 0).toLocaleString()}
                     icon={ShoppingCart}
-                    color="bg-orange-500"
+                    iconBg="bg-blue-50"
+                    iconColor="text-blue-500"
+                    accentColor="bg-blue-400"
                     trend="+8.2%"
                 />
                 <StatCard
                     title="Active Riders"
                     value={stats?.totalRiders || 0}
                     icon={Users}
-                    color="bg-blue-500"
+                    iconBg="bg-amber-50"
+                    iconColor="text-amber-500"
+                    accentColor="bg-amber-400"
                     trend="+3 new"
                 />
                 <StatCard
                     title="Avg. Order Value"
                     value={`₹${Math.round(stats?.avgOrderValue || 0).toLocaleString()}`}
                     icon={IndianRupee}
-                    color="bg-green-500"
+                    iconBg="bg-emerald-50"
+                    iconColor="text-emerald-500"
+                    accentColor="bg-emerald-400"
                     trend="Per Delivery"
                 />
             </div>
@@ -116,8 +141,8 @@ export default function AnalyticsPage() {
                             <AreaChart data={stats?.trends}>
                                 <defs>
                                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#ef4444" stopOpacity={0.1} />
-                                        <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#818cf8" stopOpacity={0.2} />
+                                        <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
@@ -127,7 +152,7 @@ export default function AnalyticsPage() {
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                     itemStyle={{ fontSize: '12px', fontWeight: 700 }}
                                 />
-                                <Area type="monotone" dataKey="revenue" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
+                                <Area type="monotone" dataKey="revenue" stroke="#818cf8" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
                             </AreaChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -150,7 +175,7 @@ export default function AnalyticsPage() {
                                     cursor={{ fill: '#fef2f2' }}
                                     contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
                                 />
-                                <Bar dataKey="orders" fill="#ef4444" radius={[4, 4, 0, 0]} barSize={20} />
+                                <Bar dataKey="orders" fill="#60a5fa" radius={[4, 4, 0, 0]} barSize={20} />
                             </BarChart>
                         </ResponsiveContainer>
                     </CardContent>

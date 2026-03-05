@@ -355,7 +355,7 @@ export default function AllOrdersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-semibold text-gray-800 tracking-tight">All Orders</h1>
+          <h1 className="text-lg font-bold text-gray-800 tracking-tight">All Orders</h1>
           <p className="text-[12px] text-gray-400 mt-0.5">Track, assign, and manage all delivery orders</p>
         </div>
         {ordersToAssignCount > 0 && (

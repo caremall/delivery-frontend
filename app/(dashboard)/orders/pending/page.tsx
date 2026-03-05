@@ -345,7 +345,7 @@ export default function PendingOrdersPage() {
         <div className="flex flex-col min-h-screen bg-[#f9fafb] p-6 lg:p-8 space-y-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-lg font-semibold text-gray-800 tracking-tight">Pending Orders</h1>
+                    <h1 className="text-lg font-bold text-gray-800 tracking-tight">Pending Orders</h1>
                     <p className="text-[12px] text-gray-400 mt-0.5">Orders waiting to be processed and assigned to riders</p>
                 </div>
                 {ordersToAssignCount > 0 && (
