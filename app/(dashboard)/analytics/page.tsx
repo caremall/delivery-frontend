@@ -19,10 +19,10 @@ const StatCard = ({ title, value, icon: Icon, color, trend }: any) => (
         <CardContent className="p-6">
             <div className="flex items-center justify-between">
                 <div>
-                    <p className="text-sm font-bold text-gray-500 mb-1">{title}</p>
+                    <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
                     <h3 className="text-2xl font-extrabold text-gray-900">{value}</h3>
                     {trend && (
-                        <p className={cn("text-[10px] font-bold mt-1", trend.startsWith('+') ? "text-green-500" : "text-red-500")}>
+                        <p className={cn("text-[10px] font-medium mt-1", trend.startsWith('+') ? "text-green-500" : "text-red-500")}>
                             {trend} from last month
                         </p>
                     )}
@@ -48,7 +48,7 @@ export default function AnalyticsPage() {
         return (
             <div className="h-[80vh] flex flex-col items-center justify-center gap-4">
                 <Loader2 className="h-10 w-10 text-red-500 animate-spin" />
-                <p className="text-sm font-bold text-gray-500 animate-pulse">Generating your analytics...</p>
+                <p className="text-sm font-medium text-gray-500 animate-pulse">Generating your analytics...</p>
             </div>
         );
     }
@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
                 {/* Revenue Trend */}
                 <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden p-6">
                     <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-widest flex items-center gap-2">
                             <IndianRupee className="h-4 w-4" /> Revenue Trend (Last 30 Days)
                         </CardTitle>
                     </CardHeader>
@@ -136,7 +136,7 @@ export default function AnalyticsPage() {
                 {/* Orders Trend */}
                 <Card className="border-none shadow-sm rounded-2xl bg-white overflow-hidden p-6">
                     <CardHeader className="px-0 pt-0">
-                        <CardTitle className="text-sm font-bold text-gray-400 uppercase tracking-widest flex items-center gap-2">
+                        <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-widest flex items-center gap-2">
                             <ShoppingCart className="h-4 w-4" /> Order Volume (Last 30 Days)
                         </CardTitle>
                     </CardHeader>
@@ -160,7 +160,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Payment Methods */}
                 <Card className="border-none shadow-sm rounded-2xl bg-white p-6">
-                    <CardTitle className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Payment Distribution</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-6">Payment Distribution</CardTitle>
                     <div className="flex flex-col md:flex-row items-center gap-8">
                         <div className="h-[200px] w-full md:w-1/2">
                             <ResponsiveContainer width="100%" height="100%">
@@ -187,7 +187,7 @@ export default function AnalyticsPage() {
                                 <div key={idx} className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                                        <span className="text-xs font-bold text-gray-600 uppercase">{p._id}</span>
+                                        <span className="text-xs font-medium text-gray-600 uppercase">{p._id}</span>
                                     </div>
                                     <span className="text-sm font-black text-gray-900">{p.count}</span>
                                 </div>
@@ -198,7 +198,7 @@ export default function AnalyticsPage() {
 
                 {/* Top Moving Products */}
                 <Card className="border-none shadow-sm rounded-2xl bg-white p-6">
-                    <CardTitle className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Top Moving Items</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-6">Top Moving Items</CardTitle>
                     <div className="space-y-4">
                         {stats?.topMovingProducts?.map((item: any, idx: number) => (
                             <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 border border-gray-100 group">
@@ -224,7 +224,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Order Status Pie */}
                 <Card className="lg:col-span-1 border-none shadow-sm rounded-2xl bg-white p-6">
-                    <CardTitle className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Order Breakdown</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-6">Order Breakdown</CardTitle>
                     <div className="h-[250px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
@@ -250,7 +250,7 @@ export default function AnalyticsPage() {
 
                 {/* Top Riders */}
                 <Card className="lg:col-span-2 border-none shadow-sm rounded-2xl bg-white p-6">
-                    <CardTitle className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Top Performing Riders</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-6">Top Performing Riders</CardTitle>
                     <div className="space-y-4">
                         {stats?.topRiders?.map((rider: any, idx: number) => (
                             <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-gray-50 border border-gray-100 hover:bg-red-50 transition-colors group">
@@ -265,13 +265,13 @@ export default function AnalyticsPage() {
                                         )}
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-bold text-gray-800">{rider.name}</h4>
+                                        <h4 className="text-sm font-medium text-gray-800">{rider.name}</h4>
                                         <p className="text-[10px] text-gray-400 font-medium">Rank #{idx + 1} Delivery King</p>
                                     </div>
                                 </div>
                                 <div className="text-right">
                                     <p className="text-lg font-black text-red-500 group-hover:scale-110 transition-transform">{rider.completedOrders}</p>
-                                    <p className="text-[9px] font-bold text-gray-400 uppercase tracking-tight">Orders Completed</p>
+                                    <p className="text-[9px] font-medium text-gray-400 uppercase tracking-tight">Orders Completed</p>
                                 </div>
                             </div>
                         ))}
@@ -284,12 +284,12 @@ export default function AnalyticsPage() {
 
             {/* Rider Status Distribution */}
             <Card className="border-none shadow-sm rounded-2xl bg-white p-6">
-                <CardTitle className="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6">Rider Network Status</CardTitle>
+                <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-widest mb-6">Rider Network Status</CardTitle>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {riderData.map((s: any, idx: number) => (
                         <div key={idx} className="p-6 rounded-2xl border border-gray-100 flex flex-col items-center justify-center gap-2 bg-[#fafafa]">
                             <h3 className="text-3xl font-black text-gray-900">{s.value}</h3>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{s.name}</p>
+                            <p className="text-xs font-medium text-gray-400 uppercase tracking-widest">{s.name}</p>
                             <div className={cn("w-full h-1.5 rounded-full mt-2 bg-gray-200 overflow-hidden")}>
                                 <div
                                     className={cn("h-full", s.name === 'active' ? "bg-green-500" : "bg-red-500")}

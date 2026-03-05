@@ -108,7 +108,7 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-9xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-bold tracking-tight text-slate-900">Setting</h1>

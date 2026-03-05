@@ -26,16 +26,16 @@ export default function PerformanceChart({ data, isLoading }: { data?: any[], is
     return (
         <Card className="rounded-xl border border-gray-100 shadow-sm bg-white h-full flex flex-col pt-0">
             <CardHeader className="px-5 py-4 border-b border-gray-50 flex flex-row items-center justify-between">
-                <CardTitle className="text-[14px] font-bold text-gray-800">Revenue</CardTitle>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-bold text-gray-400 hover:bg-gray-50 transition-colors">
+                <CardTitle className="text-[14px] font-medium text-gray-800">Revenue</CardTitle>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-medium text-gray-400 hover:bg-gray-50 transition-colors">
                     All Categories <ChevronDown className="h-4 w-4" />
                 </button>
             </CardHeader>
 
             <CardContent className="p-6 flex flex-col h-full bg-white">
                 <div className="flex items-center justify-between mb-8">
-                    <h3 className="text-sm font-bold text-gray-900">Revenue Volume</h3>
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-bold text-gray-400 hover:bg-gray-50 transition-colors">
+                    <h3 className="text-sm font-medium text-gray-900">Revenue Volume</h3>
+                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-medium text-gray-400 hover:bg-gray-50 transition-colors">
                         <Calendar className="h-3.5 w-3.5" />
                         {displayData.length > 0 ? `${displayData[0].name} - ${displayData[displayData.length - 1].name}` : "Select range"}
                         <ChevronDown className="h-4 w-4" />
@@ -68,7 +68,7 @@ export default function PerformanceChart({ data, isLoading }: { data?: any[], is
                                 content={({ active, payload }) => {
                                     if (active && payload && payload.length) {
                                         return (
-                                            <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm text-[10px] font-bold">
+                                            <div className="bg-white p-2 rounded-lg border border-gray-100 shadow-sm text-[10px] font-medium">
                                                 <p className="text-gray-900">₹{payload[0].value?.toLocaleString()}</p>
                                             </div>
                                         );

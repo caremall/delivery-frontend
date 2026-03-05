@@ -402,7 +402,7 @@ export function CustomDataTable<TData, TValue>({
                   <CalendarIcon className="h-4 w-4" /> Date
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0" align="end">
                 <div className="p-4 space-y-4">
                   {filters
                     .filter((f) => f.type === "date")
@@ -415,7 +415,8 @@ export function CustomDataTable<TData, TValue>({
                             mode="range"
                             selected={currentDateFilter as any}
                             onSelect={(range) => handleDateFilterChange(filter.column, range || {})}
-                            numberOfMonths={1}
+                            numberOfMonths={2}
+                            initialFocus
                           />
                           {currentDateFilter.from && currentDateFilter.to && (
                             <p className="text-xs text-muted-foreground">

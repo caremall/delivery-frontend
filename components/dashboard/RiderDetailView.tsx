@@ -74,7 +74,7 @@ export const RiderDetailView = ({ riderId, isOpen, onClose }: RiderDetailViewPro
                     pending: "bg-blue-50 text-blue-600 border-blue-100",
                 };
                 return (
-                    <Badge className={cn("rounded-md border text-[10px] font-bold uppercase py-0 px-2 shadow-none", colors[s] || "bg-gray-50 text-gray-400 border-gray-100")}>
+                    <Badge className={cn("rounded-md border text-[10px] font-medium uppercase py-0 px-2 shadow-none", colors[s] || "bg-gray-50 text-gray-400 border-gray-100")}>
                         {row.original.orderStatus}
                     </Badge>
                 );
@@ -113,15 +113,15 @@ export const RiderDetailView = ({ riderId, isOpen, onClose }: RiderDetailViewPro
                                     {rider.phone ? `+91 ${rider.phone}` : "No Identity"} • Joined {new Date(rider.createdAt).toLocaleDateString()}
                                 </p>
                                 <div className="flex items-center gap-2 mt-3">
-                                    <Badge className={cn("rounded-full border-none px-3 text-[10px] font-bold uppercase", rider.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400')}>
+                                    <Badge className={cn("rounded-full border-none px-3 text-[10px] font-medium uppercase", rider.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400')}>
                                         {rider.status}
                                     </Badge>
                                     {rider.kyc?.status === 'approved' ? (
-                                        <div className="flex items-center gap-1 text-blue-400 font-bold text-[10px] uppercase">
+                                        <div className="flex items-center gap-1 text-blue-400 font-medium text-[10px] uppercase">
                                             <ShieldCheck className="h-3 w-3" /> KYC Verified
                                         </div>
                                     ) : (
-                                        <div className="flex items-center gap-1 text-amber-400 font-bold text-[10px] uppercase">
+                                        <div className="flex items-center gap-1 text-amber-400 font-medium text-[10px] uppercase">
                                             <ShieldAlert className="h-3 w-3" /> KYC Pending
                                         </div>
                                     )}
@@ -144,7 +144,7 @@ export const RiderDetailView = ({ riderId, isOpen, onClose }: RiderDetailViewPro
                                         <div className={cn("p-1.5 rounded-lg", s.bg)}>
                                             <s.icon className={cn("h-4 w-4", s.color)} />
                                         </div>
-                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{s.label}</span>
+                                        <span className="text-[10px] font-medium text-gray-400 uppercase tracking-widest">{s.label}</span>
                                     </div>
                                     <span className="text-xl font-bold text-gray-900">{isLoading ? ".." : s.val}</span>
                                 </div>
@@ -154,7 +154,7 @@ export const RiderDetailView = ({ riderId, isOpen, onClose }: RiderDetailViewPro
                         {/* Recent Deliveries Table */}
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Order History</h3>
+                                <h3 className="text-sm font-medium text-gray-900 uppercase tracking-wider">Order History</h3>
                             </div>
                             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
                                 <CustomDataTable

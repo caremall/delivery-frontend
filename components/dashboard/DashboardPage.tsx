@@ -9,20 +9,65 @@ import PerformanceChart from "./PerformanceChart";
 import RecentOrders from "./RecentOrders";
 import TopProductsStock from "./TopProductsStock";
 import OrderManagementDonut from "./OrderManagementDonut";
-import { Calendar, ChevronDown } from "lucide-react";
+import {
+  ShoppingCart,
+  Clock,
+  CalendarDays,
+  PackageCheck,
+  Boxes,
+  Bike,
+  IndianRupee,
+  TrendingUp,
+} from "lucide-react";
 
-const SummaryCard = ({ title, value, subValue, dotColor, isLoading }: any) => (
-  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col gap-4 relative overflow-hidden group hover:border-red-100 transition-all">
-    <div className="flex items-center gap-2">
-      <div className={cn("w-1.5 h-1.5 rounded-full", dotColor)} />
-      <span className="text-[12px] font-bold text-gray-400 capitalize">{title}</span>
+const SummaryCard = ({
+  title,
+  value,
+  subValue,
+  icon: Icon,
+  iconBg,
+  iconColor,
+  accentColor,
+  isLoading,
+}: any) => (
+  <div
+    className={cn(
+      "bg-white rounded-2xl border border-gray-100 shadow-sm p-5 flex flex-col gap-3 relative overflow-hidden group",
+      "hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-default"
+    )}
+  >
+    {/* Colored bottom accent bar — slides up on hover */}
+    <div
+      className={cn(
+        "absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-300 group-hover:h-1",
+        accentColor
+      )}
+    />
+
+    <div className="flex items-start justify-between">
+      <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider mt-0.5">
+        {title}
+      </span>
+      {/* Colored icon pill */}
+      <div className={cn("p-2 rounded-xl", iconBg)}>
+        <Icon className={cn("h-4 w-4", iconColor)} />
+      </div>
     </div>
+
     <div className="flex flex-col gap-1">
       <h3 className="text-[22px] font-bold text-gray-900 tracking-tight">
-        {isLoading ? "..." : value}
+        {isLoading ? (
+          <span className="inline-block h-7 w-16 bg-gray-100 rounded-lg animate-pulse" />
+        ) : (
+          value
+        )}
       </h3>
       {subValue && (
-        <p className={cn("text-[10px] font-bold", subValue.startsWith('+') ? "text-green-500" : "text-gray-300")}>
+        <p className={cn("text-[10px] font-medium",
+          subValue.toString().startsWith('+') || subValue.toString().includes('New')
+            ? "text-emerald-500"
+            : "text-gray-400"
+        )}>
           {subValue}
         </p>
       )}
@@ -45,50 +90,79 @@ export default function DashboardPage() {
     {
       title: "Total Orders",
       value: (statsData?.totalOrders || 0).toLocaleString(),
-      subValue: `${statsData?.todaysOrders || 0} New Today`,
-      dotColor: "bg-green-500",
+      subValue: `+${statsData?.todaysOrders || 0} New Today`,
+      icon: ShoppingCart,
+      iconBg: "bg-violet-50",
+      iconColor: "text-violet-500",
+      accentColor: "bg-violet-400",
     },
     {
       title: "Pending Orders",
       value: statsData?.pendingOrders || 0,
-      dotColor: "bg-orange-500",
+      subValue: "Awaiting dispatch",
+      icon: Clock,
+      iconBg: "bg-amber-50",
+      iconColor: "text-amber-500",
+      accentColor: "bg-amber-400",
     },
     {
-      title: "Todays Orders",
+      title: "Today's Orders",
       value: statsData?.todaysOrders || 0,
-      dotColor: "bg-red-500",
+      subValue: "Received today",
+      icon: CalendarDays,
+      iconBg: "bg-rose-50",
+      iconColor: "text-rose-500",
+      accentColor: "bg-rose-400",
     },
     {
       title: "Orders Assigned",
       value: statsData?.ordersAssigned || 0,
       subValue: "Current assignments",
-      dotColor: "bg-purple-500",
+      icon: PackageCheck,
+      iconBg: "bg-blue-50",
+      iconColor: "text-blue-500",
+      accentColor: "bg-blue-400",
     },
     {
-      title: "Products instock",
+      title: "Products In Stock",
       value: statsData?.productsInStock || 0,
       subValue: "Total in hub",
-      dotColor: "bg-green-500",
+      icon: Boxes,
+      iconBg: "bg-emerald-50",
+      iconColor: "text-emerald-500",
+      accentColor: "bg-emerald-400",
     },
     {
       title: "Active Riders",
       value: isLoading ? "..." : `${statsData?.activeRiders || 0}/${statsData?.totalRiders || 0}`,
-      dotColor: "bg-green-500",
+      subValue: "On duty now",
+      icon: Bike,
+      iconBg: "bg-teal-50",
+      iconColor: "text-teal-500",
+      accentColor: "bg-teal-400",
     },
     {
       title: "Total Revenue",
-      value: `Rs. ${(statsData?.totalRevenue || 0).toLocaleString()}`,
-      dotColor: "bg-red-500",
+      value: `₹${(statsData?.totalRevenue || 0).toLocaleString()}`,
+      subValue: "All time",
+      icon: IndianRupee,
+      iconBg: "bg-red-50",
+      iconColor: "text-red-500",
+      accentColor: "bg-red-400",
     },
     {
       title: "Today's Revenue",
-      value: `Rs. ${(statsData?.revenueToday || 0).toLocaleString()}`,
-      dotColor: "bg-purple-500",
+      value: `₹${(statsData?.revenueToday || 0).toLocaleString()}`,
+      subValue: "Earned today",
+      icon: TrendingUp,
+      iconBg: "bg-fuchsia-50",
+      iconColor: "text-fuchsia-500",
+      accentColor: "bg-fuchsia-400",
     },
   ];
 
   return (
-    <div className="p-6 lg:p-8 space-y-6 bg-[#fcfcfc] min-h-screen">
+    <div className="p-6 lg:p-8 space-y-6 bg-[#f7f8fa] min-h-screen">
       {/* Top Header */}
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-xl font-bold text-gray-800 tracking-tight">Dashboard</h1>

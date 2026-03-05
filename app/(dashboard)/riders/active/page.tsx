@@ -3,44 +3,38 @@
 import React, { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
     Search,
     Bike,
-    UserCheck,
-    ShieldCheck,
-    Phone,
-    Mail,
-    MoreHorizontal,
-    ChevronLeft,
-    ChevronRight,
     PackageCheck,
     Truck,
-    MapPin,
+    Phone,
+    ChevronLeft,
+    ChevronRight,
+    MoreHorizontal,
+    ShieldCheck,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { RiderDetailView } from "@/components/dashboard/RiderDetailView";
 
 export default function ActiveRidersPage() {
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [page, setPage] = useState(1);
+    const [selectedRiderId, setSelectedRiderId] = useState<string | null>(null);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            setDebouncedSearch(search);
-            setPage(1);
-        }, 500);
+        const timer = setTimeout(() => { setDebouncedSearch(search); setPage(1); }, 500);
         return () => clearTimeout(timer);
     }, [search]);
 
@@ -50,9 +44,8 @@ export default function ActiveRidersPage() {
             const params = new URLSearchParams();
             if (debouncedSearch) params.append("search", debouncedSearch);
             params.append("page", String(page));
-            params.append("limit", "12"); // Show 12 cards per page (3x4 or 2x6)
-            const res = await axiosInstance.get(`/riders/list/active?${params.toString()}`);
-            return res.data.data;
+            params.append("limit", "12");
+            return (await axiosInstance.get(`/riders/list/active?${params}`)).data.data;
         },
     });
 
@@ -60,156 +53,191 @@ export default function ActiveRidersPage() {
     const pagination = activeRidersData?.pagination;
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#f8fafc] p-6 lg:p-8 space-y-8">
-            {/* Header Area */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="flex flex-col min-h-screen bg-[#f7f8fa] p-6 lg:p-8 space-y-6">
+
+            {/* ── Header ── */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-black text-[#0f172a] tracking-tight flex items-center gap-3">
-                        <div className="p-2 bg-emerald-100 rounded-xl">
-                            <UserCheck className="h-6 w-6 text-emerald-600" />
-                        </div>
-                        Active Fleet
-                    </h1>
-                    <p className="text-sm text-gray-500 font-medium mt-1">
-                        Displaying riders who are currently On-Duty and KYC Approved
+                    <h1 className="text-lg font-semibold text-gray-800 tracking-tight">Active Fleet</h1>
+                    <p className="text-[12px] text-gray-400 mt-0.5">
+                        Riders currently on-duty with approved KYC
+                        {pagination?.totalRiders ? (
+                            <span className="ml-1.5 inline-flex items-center px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-semibold">
+                                {pagination.totalRiders} active
+                            </span>
+                        ) : null}
                     </p>
                 </div>
 
-                <div className="relative w-full sm:max-w-xs group">
-                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 group-focus-within:text-[#dc2626] transition-colors" />
+                <div className="relative w-full sm:max-w-[260px] group">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 group-focus-within:text-gray-600 transition-colors" />
                     <Input
-                        placeholder="Search active riders..."
+                        placeholder="Search riders..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="pl-11 h-12 rounded-2xl bg-white border-none shadow-sm focus-visible:ring-2 focus-visible:ring-red-600/20 font-medium text-sm transition-all"
+                        className="pl-9 h-9 rounded-xl bg-white border-gray-100 shadow-sm text-[13px] focus-visible:ring-1 focus-visible:ring-gray-200"
                     />
                 </div>
             </div>
 
-            {/* Grid Layout for Active Riders */}
+            {/* ── Grid ── */}
             {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {[...Array(8)].map((_, i) => (
-                        <div key={i} className="h-[280px] bg-white rounded-3xl animate-pulse shadow-sm" />
+                        <div key={i} className="h-[200px] bg-white rounded-2xl animate-pulse border border-gray-50 shadow-sm" />
                     ))}
                 </div>
             ) : riders.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
-                    <Bike className="h-16 w-16 text-gray-200 mb-4" />
-                    <p className="text-lg font-bold text-gray-400">No active riders found</p>
-                    <p className="text-sm text-gray-300">Try adjusting your search or check KYC approvals</p>
+                <div className="flex flex-col items-center justify-center py-24 bg-white rounded-2xl border border-dashed border-gray-200">
+                    <Bike className="h-10 w-10 text-gray-200 mb-3" />
+                    <p className="text-[13px] font-semibold text-gray-400">No active riders found</p>
+                    <p className="text-[11px] text-gray-300 mt-1">Try adjusting your search or check KYC approvals</p>
                 </div>
             ) : (
                 <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                        {riders.map((rider: any) => (
-                            <Card key={rider._id} className="group border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2rem] overflow-hidden bg-white">
-                                <CardContent className="p-6">
-                                    {/* Rider Profile Section */}
-                                    <div className="flex items-start justify-between mb-6">
-                                        <div className="relative">
-                                            <Avatar className="h-16 w-16 border-4 border-emerald-50 shadow-md">
-                                                <AvatarImage src={rider.avatar || undefined} />
-                                                <AvatarFallback className="bg-red-50 text-red-600 font-black">
-                                                    {rider.name?.charAt(0) || "R"}
-                                                </AvatarFallback>
-                                            </Avatar>
-                                            <div className="absolute -bottom-1 -right-1 p-1 bg-white rounded-full shadow-sm">
-                                                <div className="h-3 w-3 bg-emerald-500 rounded-full animate-pulse" title="Online" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {riders.map((rider: any) => {
+                            const delivered = rider.performance?.deliveredCount || 0;
+                            const inTransit = rider.performance?.pendingCount || 0;
+                            const totalOrders = rider.performance?.totalOrders || 0;
+                            // Use backend-computed rate (same formula as detail view)
+                            const rate = rider.performance?.completionRate ?? (totalOrders > 0 ? Math.round((delivered / totalOrders) * 100) : null);
+
+                            return (
+                                <div
+                                    key={rider._id}
+                                    className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 overflow-hidden group"
+                                >
+                                    {/* Top accent */}
+                                    <div className="h-[3px] bg-emerald-400 w-full" />
+
+                                    <div className="p-4">
+                                        {/* Header row */}
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="relative flex-shrink-0">
+                                                    <Avatar className="h-10 w-10 border border-gray-100 shadow-sm">
+                                                        <AvatarImage src={rider.avatar || undefined} />
+                                                        <AvatarFallback className="bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                                                            {rider.name?.charAt(0) || "R"}
+                                                        </AvatarFallback>
+                                                    </Avatar>
+                                                    {/* Online dot */}
+                                                    <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-400 border-2 border-white rounded-full" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-[13px] font-semibold text-gray-800 truncate leading-tight">
+                                                        {rider.name}
+                                                    </p>
+                                                    <div className="flex items-center gap-1 mt-0.5">
+                                                        <Phone className="h-2.5 w-2.5 text-gray-400" />
+                                                        <span className="text-[10px] text-gray-400">+91 {rider.phone}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <button className="h-7 w-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
+                                                        <MoreHorizontal className="h-4 w-4" />
+                                                    </button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end" className="rounded-xl w-40 shadow-lg border-gray-100 p-1">
+                                                    <DropdownMenuItem className="rounded-lg px-3 py-2 text-[12px] font-medium cursor-pointer" onClick={() => setSelectedRiderId(rider._id)}>
+                                                        View Profile
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem className="rounded-lg px-3 py-2 text-[12px] font-medium text-red-500 focus:bg-red-50 focus:text-red-600 cursor-pointer">
+                                                        Mark Off Duty
+                                                    </DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+
+                                        {/* KYC badge */}
+                                        <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-50 border border-green-100 mb-3">
+                                            <ShieldCheck className="h-2.5 w-2.5 text-green-600" />
+                                            <span className="text-[9px] font-semibold text-green-700 uppercase tracking-wider">KYC Approved</span>
+                                        </div>
+
+                                        {/* Stats row */}
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <div className="bg-gray-50 rounded-xl p-2.5 flex flex-col gap-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <PackageCheck className="h-3 w-3 text-emerald-500" />
+                                                    <span className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">Delivered</span>
+                                                </div>
+                                                <span className="text-lg font-semibold text-gray-800 tabular-nums leading-none">{delivered}</span>
+                                            </div>
+                                            <div className="bg-gray-50 rounded-xl p-2.5 flex flex-col gap-0.5">
+                                                <div className="flex items-center gap-1">
+                                                    <Truck className="h-3 w-3 text-indigo-400" />
+                                                    <span className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">In-Transit</span>
+                                                </div>
+                                                <span className="text-lg font-semibold text-gray-800 tabular-nums leading-none">{inTransit}</span>
                                             </div>
                                         </div>
 
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" className="h-8 w-8 p-0 rounded-full hover:bg-gray-100">
-                                                    <MoreHorizontal className="h-4 w-4 text-gray-400" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="rounded-2xl w-48 shadow-xl border-none p-2">
-                                                <DropdownMenuLabel>Fleet Actions</DropdownMenuLabel>
-                                                <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="rounded-xl py-2 cursor-pointer font-medium">View Profile</DropdownMenuItem>
-                                                <DropdownMenuItem className="rounded-xl py-2 cursor-pointer font-medium text-red-600">Mark Off Duty</DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <h3 className="text-lg font-black text-[#0f172a] truncate">{rider.name}</h3>
-                                        <p className="text-xs text-gray-400 font-bold tracking-tight uppercase">HUB: Kochi Central</p>
-                                    </div>
-
-                                    {/* Performance Metrics */}
-                                    <div className="grid grid-cols-2 gap-3 mt-6">
-                                        <div className="bg-slate-50 rounded-2xl p-3 flex flex-col items-center">
-                                            <div className="flex items-center gap-1.5 mb-1">
-                                                <PackageCheck className="h-3.5 w-3.5 text-emerald-600" />
-                                                <span className="text-[10px] font-black text-slate-400 uppercase">Completed</span>
+                                        {/* Completion rate */}
+                                        {rate !== null && (
+                                            <div className="mt-3">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-[9px] text-gray-400 font-medium uppercase tracking-wider">Completion rate</span>
+                                                    <span className="text-[10px] font-semibold text-gray-600">{rate}%</span>
+                                                </div>
+                                                <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-emerald-400 rounded-full transition-all duration-500"
+                                                        style={{ width: `${rate}%` }}
+                                                    />
+                                                </div>
                                             </div>
-                                            <span className="text-xl font-black text-[#0f172a]">{rider.performance?.deliveredCount || 0}</span>
-                                        </div>
-
-                                        <div className="bg-slate-50 rounded-2xl p-3 flex flex-col items-center">
-                                            <div className="flex items-center gap-1.5 mb-1">
-                                                <Truck className="h-3.5 w-3.5 text-indigo-600" />
-                                                <span className="text-[10px] font-black text-slate-400 uppercase">In-Transit</span>
-                                            </div>
-                                            <span className="text-xl font-black text-[#0f172a]">{rider.performance?.pendingCount || 0}</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Contact Info Tags */}
-                                    <div className="flex flex-wrap gap-2 mt-6">
-                                        <Badge variant="secondary" className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border-none px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5">
-                                            <Phone className="h-3 w-3" /> {rider.phone}
-                                        </Badge>
-                                        {rider.email && (
-                                            <Badge variant="secondary" className="bg-slate-50 text-slate-600 hover:bg-slate-100 border-none px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1.5 max-w-[120px] truncate">
-                                                <Mail className="h-3 w-3" /> {rider.email}
-                                            </Badge>
                                         )}
                                     </div>
-                                </CardContent>
-
-                                <CardFooter className="p-2 pt-0 px-4 pb-4">
-                                    <Button className="w-full bg-[#dc2626] hover:bg-red-700 text-white font-black h-11 rounded-2xl flex gap-2 items-center shadow-md shadow-red-100 transition-all active:scale-[0.98]">
-                                        <MapPin className="h-4 w-4" /> LIVE TRACKING
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
+                                </div>
+                            );
+                        })}
                     </div>
 
-                    {/* Pagination Controls */}
+                    {/* Pagination */}
                     {pagination && pagination.totalPages > 1 && (
-                        <div className="flex items-center justify-between pt-6 border-t border-gray-100 mt-4">
-                            <p className="text-sm text-gray-500 font-medium">
+                        <div className="flex items-center justify-between pt-2">
+                            <span className="text-[12px] text-gray-400">
                                 Page {pagination.currentPage} of {pagination.totalPages}
-                            </p>
-                            <div className="flex items-center gap-3">
+                            </span>
+                            <div className="flex items-center gap-2">
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     disabled={!pagination.hasPrev}
                                     onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                    className="rounded-xl h-10 px-4 font-bold border-none shadow-sm bg-white"
+                                    className="h-8 px-3 rounded-lg text-[12px] font-medium border-gray-100 bg-white"
                                 >
-                                    <ChevronLeft className="h-4 w-4 mr-2" /> Previous
+                                    <ChevronLeft className="h-3.5 w-3.5 mr-1" /> Prev
                                 </Button>
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     disabled={!pagination.hasNext}
                                     onClick={() => setPage((p) => p + 1)}
-                                    className="rounded-xl h-10 px-4 font-bold border-none shadow-sm bg-white"
+                                    className="h-8 px-3 rounded-lg text-[12px] font-medium border-gray-100 bg-white"
                                 >
-                                    Next <ChevronRight className="h-4 w-4 ml-2" />
+                                    Next <ChevronRight className="h-3.5 w-3.5 ml-1" />
                                 </Button>
                             </div>
                         </div>
                     )}
                 </>
             )}
+            {/* ── Detail Modal ── */}
+            {selectedRiderId && (
+                <RiderDetailView
+                    riderId={selectedRiderId}
+                    isOpen={!!selectedRiderId}
+                    onClose={() => setSelectedRiderId(null)}
+                />
+            )}
         </div>
     );
 }
+

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -69,9 +69,18 @@ const findCurrentPage = (
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { manager, token, clearAuth } = useAuthStore();
+
+  // Wait for Zustand persist to finish rehydrating from localStorage
+  useEffect(() => {
+    const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+    // If already hydrated (e.g. not first load), mark immediately
+    if (useAuthStore.persist.hasHydrated()) setHydrated(true);
+    return () => unsub();
+  }, []);
 
   const noLayoutRoutes = ["/", "/login"];
 
@@ -80,11 +89,14 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     return <>{children}</>;
   }
 
-  // Not authenticated → redirect
+  // Still waiting for rehydration — render nothing to avoid flash-redirect
+  if (!hydrated) {
+    return null;
+  }
+
+  // Hydrated but not authenticated → redirect
   if (!token || !manager) {
-    if (typeof window !== "undefined") {
-      window.location.href = "/login";
-    }
+    router.replace("/login");
     return null;
   }
 

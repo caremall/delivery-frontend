@@ -33,7 +33,7 @@ export default function StockAlert() {
     return (
         <Card className="rounded-xl border border-gray-100 shadow-sm bg-white h-full flex flex-col">
             <CardHeader className="px-5 py-4 border-b border-gray-50 flex flex-row items-center justify-between">
-                <CardTitle className="text-[14px] font-bold text-gray-800">Stock Alert</CardTitle>
+                <CardTitle className="text-[14px] font-medium text-gray-800">Stock Alert</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-3 overflow-y-auto max-h-[460px] custom-scrollbar">
                 {stockAlerts.map((alert) => (
@@ -42,7 +42,7 @@ export default function StockAlert() {
                             <alert.icon className="h-5 w-5 text-gray-500" />
                         </div>
                         <div className="min-w-0">
-                            <h4 className="text-[12px] font-bold text-gray-800 leading-tight mb-1">
+                            <h4 className="text-[12px] font-medium text-gray-800 leading-tight mb-1">
                                 {alert.title}
                             </h4>
                             <p className="text-[10px] font-medium text-gray-400">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, ChevronDown, ChevronUp } from "lucide-react";
+import { Search, Plus, ChevronDown, ChevronUp, IndianRupee, Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
@@ -152,9 +152,9 @@ export default function RecentOrders({ orders, isLoading }: { orders?: any[], is
     return (
         <Card className="rounded-xl border border-gray-100 shadow-sm bg-white h-full flex flex-col">
             <CardHeader className="p-6 pb-4 flex flex-row items-center justify-between border-b border-gray-50">
-                <CardTitle className="text-[14px] font-bold text-gray-800 uppercase tracking-wider">Recent Orders</CardTitle>
+                <CardTitle className="text-[14px] font-medium text-gray-800 uppercase tracking-wider">Recent Orders</CardTitle>
                 <Link href="/orders/all-orders">
-                    <button className="text-red-500 hover:text-red-600 font-bold text-[12px] transition-colors cursor-pointer">
+                    <button className="text-red-500 hover:text-red-600 font-medium text-[12px] transition-colors cursor-pointer">
                         See all
                     </button>
                 </Link>
@@ -172,41 +172,69 @@ export default function RecentOrders({ orders, isLoading }: { orders?: any[], is
                 </div>
 
                 <div className="overflow-x-auto bg-white flex-1 min-h-[400px]">
-                    <table className="w-full text-left">
-                        <thead className="bg-[#fafafa]/80 sticky top-0 z-10">
-                            <tr className="border-b border-gray-50">
-                                <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-tight">Order ID</th>
-                                <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-tight flex items-center gap-1.5">
-                                    Customer Name <div className="flex flex-col text-[8px] opacity-40 leading-[4px]"><ChevronUp className="h-2 w-2" /><ChevronDown className="h-2 w-2" /></div>
-                                </th>
-                                <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-tight">Delivery Rider</th>
-                                <th className="px-6 py-4 text-[12px] font-bold text-gray-400 uppercase tracking-tight">Status</th>
+                    <table className="w-full text-left table-fixed">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-100">
+                                <th className="w-[18%] px-5 py-3 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Order ID</th>
+                                <th className="w-[22%] px-5 py-3 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Customer</th>
+                                <th className="w-[14%] px-5 py-3 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Amount</th>
+                                <th className="w-[24%] px-5 py-3 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Rider</th>
+                                <th className="w-[22%] px-5 py-3 text-[11px] font-medium text-gray-400 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50 bg-white">
+                        <tbody className="bg-white">
                             {isLoading ? (
                                 Array.from({ length: 5 }).map((_, idx) => (
-                                    <tr key={idx} className="animate-pulse">
-                                        <td className="px-6 py-5"><div className="h-4 bg-gray-100 rounded w-20"></div></td>
-                                        <td className="px-6 py-5"><div className="h-4 bg-gray-100 rounded w-32"></div></td>
-                                        <td className="px-6 py-5"><div className="h-4 bg-gray-100 rounded w-28"></div></td>
-                                        <td className="px-6 py-5"><div className="h-6 bg-gray-100 rounded w-16"></div></td>
+                                    <tr key={idx} className={cn("animate-pulse border-b border-gray-50", idx % 2 === 1 && "bg-gray-50/40")}>
+                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-20"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-28"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-16"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-3.5 bg-gray-100 rounded w-24"></div></td>
+                                        <td className="px-5 py-3.5"><div className="h-5 bg-gray-100 rounded w-16"></div></td>
                                     </tr>
                                 ))
                             ) : currentOrders.length === 0 ? (
                                 <tr>
-                                    <td colSpan={4} className="px-6 py-10 text-center text-gray-400 text-sm italic">
+                                    <td colSpan={5} className="px-5 py-10 text-center text-gray-400 text-sm italic">
                                         No recent orders found
                                     </td>
                                 </tr>
                             ) : (
                                 currentOrders.map((order, idx) => {
                                     const assignedRider = getAssignedRider(order);
+                                    const date = order.createdAt
+                                        ? new Date(order.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short" })
+                                        : "";
+                                    const itemCount = order.items?.reduce((s: number, i: any) => s + (i.quantity || 1), 0) || 0;
                                     return (
-                                        <tr key={idx} className="hover:bg-gray-50/50 transition-colors group">
-                                            <td className="px-6 py-5 text-[13px] font-bold text-gray-700">{order.orderId}</td>
-                                            <td className="px-6 py-5 text-[13px] font-bold text-gray-700">{order.shippingAddress?.fullName || "-"}</td>
-                                            <td className="px-6 py-5 text-[13px] font-bold text-gray-700">
+                                        <tr
+                                            key={idx}
+                                            className={cn(
+                                                "border-b border-gray-50 hover:bg-blue-50/30 transition-colors group",
+                                                idx % 2 === 1 && "bg-gray-50/40"
+                                            )}
+                                        >
+                                            {/* Order ID + date */}
+                                            <td className="px-5 py-3 align-middle">
+                                                <span className="text-[12px] font-mono font-medium text-indigo-600 truncate block">{order.orderId}</span>
+                                                <span className="text-[10px] text-gray-400">{date}</span>
+                                            </td>
+                                            {/* Customer */}
+                                            <td className="px-5 py-3 align-middle">
+                                                <span className="text-[12px] font-medium text-gray-800 truncate block">{order.shippingAddress?.fullName || "—"}</span>
+                                                <span className="text-[10px] text-gray-400 truncate block">{order.shippingAddress?.city || ""}</span>
+                                            </td>
+                                            {/* Amount */}
+                                            <td className="px-5 py-3 align-middle">
+                                                <span className="text-[12px] font-semibold text-gray-800">₹{order.totalAmount?.toLocaleString() || "—"}</span>
+                                                {itemCount > 0 && (
+                                                    <span className="flex items-center gap-0.5 text-[10px] text-gray-400 mt-0.5">
+                                                        <Package className="h-2.5 w-2.5" />{itemCount} item{itemCount !== 1 ? "s" : ""}
+                                                    </span>
+                                                )}
+                                            </td>
+                                            {/* Rider */}
+                                            <td className="px-5 py-3 align-middle">
                                                 <RiderAssignSelect
                                                     orderId={order._id}
                                                     currentRiderId={assignedRider?._id}
@@ -215,8 +243,9 @@ export default function RecentOrders({ orders, isLoading }: { orders?: any[], is
                                                     onSelect={(riderId) => assignRider.mutate({ orderId: order._id, riderId })}
                                                 />
                                             </td>
-                                            <td className="px-6 py-5">
-                                                <Badge variant="outline" className={cn("px-3 py-1 rounded-lg text-[11px] font-bold", getStatusStyle(order.orderStatus))}>
+                                            {/* Status */}
+                                            <td className="px-5 py-3 align-middle">
+                                                <Badge variant="outline" className={cn("px-2.5 py-0.5 rounded-md text-[11px] font-medium capitalize", getStatusStyle(order.orderStatus))}>
                                                     {order.orderStatus?.replace(/_/g, ' ')}
                                                 </Badge>
                                             </td>

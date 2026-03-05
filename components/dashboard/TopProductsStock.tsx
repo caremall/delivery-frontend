@@ -22,7 +22,7 @@ export default function TopProductsStock({ data, isLoading }: TopProductsStockPr
     return (
         <Card className="rounded-xl border border-gray-100 shadow-sm bg-white h-full flex flex-col">
             <CardHeader className="px-5 py-4 border-b border-gray-50 flex flex-row items-center justify-between">
-                <CardTitle className="text-[14px] font-bold text-gray-800">Top Products Stock</CardTitle>
+                <CardTitle className="text-[14px] font-medium text-gray-800">Top Products Stock</CardTitle>
             </CardHeader>
             <CardContent className="p-4 space-y-3 overflow-y-auto max-h-[460px] custom-scrollbar">
                 {isLoading ? (
@@ -51,7 +51,7 @@ export default function TopProductsStock({ data, isLoading }: TopProductsStockPr
                                 )}
                             </div>
                             <div className="min-w-0 flex-1">
-                                <h4 className="text-[12px] font-bold text-gray-800 leading-tight mb-1 truncate">
+                                <h4 className="text-[12px] font-medium text-gray-800 leading-tight mb-1 truncate">
                                     {product.productName}
                                 </h4>
                                 <div className="flex items-center justify-between">
@@ -59,7 +59,7 @@ export default function TopProductsStock({ data, isLoading }: TopProductsStockPr
                                         Current Stock
                                     </p>
                                     <span className={cn(
-                                        "text-[11px] font-bold",
+                                        "text-[11px] font-medium",
                                         product.totalStock < 10 ? "text-red-500" : "text-gray-700"
                                     )}>
                                         {product.totalStock} units

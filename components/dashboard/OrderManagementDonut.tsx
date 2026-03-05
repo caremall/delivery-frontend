@@ -19,10 +19,10 @@ export default function OrderManagementDonut({ stats, isLoading }: { stats?: any
         <Card className="rounded-xl border border-gray-100 shadow-sm bg-white h-full flex flex-col">
             <CardHeader className="px-5 py-4 flex flex-row items-center justify-between border-b border-gray-50">
                 <div>
-                    <CardTitle className="text-[14px] font-bold text-gray-800">Order Management</CardTitle>
-                    
+                    <CardTitle className="text-[14px] font-medium text-gray-800">Order Management</CardTitle>
+
                 </div>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-bold text-gray-400 hover:bg-gray-50 transition-colors">
+                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-medium text-gray-400 hover:bg-gray-50 transition-colors">
                     All <ChevronDown className="h-4 w-4" />
                 </button>
             </CardHeader>
@@ -63,7 +63,7 @@ export default function OrderManagementDonut({ stats, isLoading }: { stats?: any
                     {data.map((item) => (
                         <div key={item.name} className="flex items-center gap-2">
                             <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                            <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                            <span className="text-[11px] font-medium text-gray-400 uppercase tracking-wider">
                                 {item.name} : {isLoading ? "..." : item.value}
                             </span>
                         </div>

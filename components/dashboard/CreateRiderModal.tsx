@@ -103,26 +103,26 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Full name *</Label>
+                                    <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Full name *</Label>
                                     <Input
                                         {...register("name", { required: "Name is required" })}
                                         placeholder="Enter full name"
                                         className="h-11 rounded-xl border-gray-100 bg-gray-50/50"
                                     />
-                                    {errors.name && <p className="text-[10px] text-red-500 font-bold">{errors.name?.message as string}</p>}
+                                    {errors.name && <p className="text-[10px] text-red-500 font-medium">{errors.name?.message as string}</p>}
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Mobile Number *</Label>
+                                    <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Mobile Number *</Label>
                                     <Input
                                         {...register("phone", { required: "Phone is required" })}
                                         type="number"
                                         placeholder="10 digit number"
                                         className="h-11 rounded-xl border-gray-100 bg-gray-50/50"
                                     />
-                                    {errors.phone && <p className="text-[10px] text-red-500 font-bold">{errors.phone?.message as string}</p>}
+                                    {errors.phone && <p className="text-[10px] text-red-500 font-medium">{errors.phone?.message as string}</p>}
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Email (Optional)</Label>
+                                    <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Email (Optional)</Label>
                                     <Input
                                         {...register("email")}
                                         type="email"
@@ -131,7 +131,7 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Avatar URL</Label>
+                                    <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Avatar URL</Label>
                                     <Input
                                         {...register("avatar")}
                                         placeholder="https://image-url.com"
@@ -148,7 +148,7 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Driving Licence URL</Label>
+                                    <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Driving Licence URL</Label>
                                     <Input
                                         {...register("kyc.drivingLicence")}
                                         placeholder="DL Image URL"
@@ -156,7 +156,7 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                     />
                                 </div>
                                 <div className="space-y-1.5">
-                                    <Label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">KYC Status</Label>
+                                    <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">KYC Status</Label>
                                     <Select
                                         defaultValue="approved"
                                         onValueChange={(val) => setValue("kyc.status", val)}
@@ -182,7 +182,7 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                             </h4>
                             <div className="space-y-6">
                                 <div className="space-y-1.5 max-w-xs">
-                                    <Label className="text-[10px] font-bold uppercase text-gray-400 tracking-wider">Payment Mode</Label>
+                                    <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Payment Mode</Label>
                                     <Select
                                         onValueChange={(val) => {
                                             setSelectedPaymentMode(val);
@@ -202,19 +202,19 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                 {selectedPaymentMode === 'bank' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
                                         <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-bold uppercase text-gray-400">Account Holder Name</Label>
+                                            <Label className="text-[10px] font-medium uppercase text-gray-400">Account Holder Name</Label>
                                             <Input {...register("bankDetails.accountHolderName")} className="bg-white" />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-bold uppercase text-gray-400">Bank Name</Label>
+                                            <Label className="text-[10px] font-medium uppercase text-gray-400">Bank Name</Label>
                                             <Input {...register("bankDetails.bankName")} className="bg-white" />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-bold uppercase text-gray-400">Account Number</Label>
+                                            <Label className="text-[10px] font-medium uppercase text-gray-400">Account Number</Label>
                                             <Input {...register("bankDetails.accountNumber")} className="bg-white" />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-bold uppercase text-gray-400">IFSC Code</Label>
+                                            <Label className="text-[10px] font-medium uppercase text-gray-400">IFSC Code</Label>
                                             <Input {...register("bankDetails.ifscCode", { onChange: (e) => e.target.value = e.target.value.toUpperCase() })} className="bg-white" />
                                         </div>
                                     </div>
@@ -223,11 +223,11 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                 {selectedPaymentMode === 'upi' && (
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
                                         <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-bold uppercase text-gray-400">UPI ID</Label>
+                                            <Label className="text-[10px] font-medium uppercase text-gray-400">UPI ID</Label>
                                             <Input {...register("bankDetails.upiId")} placeholder="username@bank" className="bg-white" />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-bold uppercase text-gray-400">UPI Number</Label>
+                                            <Label className="text-[10px] font-medium uppercase text-gray-400">UPI Number</Label>
                                             <Input {...register("bankDetails.upiNumber")} placeholder="Mob linked UPI" className="bg-white" />
                                         </div>
                                     </div>

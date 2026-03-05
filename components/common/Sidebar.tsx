@@ -10,7 +10,6 @@ import {
   ChevronRight,
   ChevronDown,
   ChevronUp,
-  Truck,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -111,7 +110,7 @@ export function Sidebar({
             }
           }}
         >
-          <item.icon className="h-4 w-4 flex-shrink-0" />
+          <item.icon className="h-4 w-4 shrink-0" />
           {(!isCollapsed || isMobile) && (
             <>
               <span className="flex-1 text-left font-medium text-sm">
@@ -119,9 +118,9 @@ export function Sidebar({
               </span>
               {hasChildren &&
                 (isExpanded ? (
-                  <ChevronUp className="h-4 w-4 flex-shrink-0" />
+                  <ChevronUp className="h-4 w-4 shrink-0" />
                 ) : (
-                  <ChevronDown className="h-4 w-4 flex-shrink-0" />
+                  <ChevronDown className="h-4 w-4 shrink-0" />
                 ))}
             </>
           )}
@@ -143,7 +142,7 @@ export function Sidebar({
                   )}
                   onClick={() => handleNavigation(child, isMobile)}
                 >
-                  <child.icon className="h-3.5 w-3.5 flex-shrink-0" />
+                  <child.icon className="h-3.5 w-3.5 shrink-0" />
                   <span className="truncate">{child.name}</span>
                 </Button>
               );
@@ -168,17 +167,12 @@ export function Sidebar({
           <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
             {!isCollapsed && (
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                  <Truck className="h-5 w-5 text-white" />
-                </div>
-                <span className="text-lg font-semibold text-gray-900">
-                  Delivery Hub
-                </span>
+                <img src="/caremall.png" alt="CareMall Logo" className="h-8 object-contain" />
               </div>
             )}
             {isCollapsed && (
-              <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mx-auto">
-                <Truck className="h-5 w-5 text-white" />
+              <div className="flex items-center justify-center mx-auto">
+                <img src="/caremall.png" alt="CareMall Logo" className="h-6 object-contain" />
               </div>
             )}
             <Button
@@ -204,12 +198,12 @@ export function Sidebar({
                     src={manager?.assignedWarehouses?.[0]?.hubImage}
                     className="object-cover"
                   />
-                  <AvatarFallback className="bg-red-600 text-white text-sm font-black italic">
+                  <AvatarFallback className="bg-red-600 text-white text-sm font-semibold italic">
                     {manager?.fullName?.charAt(0) || "M"}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-black text-gray-900 truncate tracking-tight">
+                  <p className="text-[13px] font-semibold text-gray-900 truncate tracking-tight">
                     {manager?.fullName || "Manager"}
                   </p>
                   <p className="text-xs text-gray-500 truncate">
@@ -229,7 +223,7 @@ export function Sidebar({
           </nav>
 
           {/* Logout */}
-          <div className="flex-shrink-0 px-2 py-4 border-t border-gray-200">
+          <div className="shrink-0 px-2 py-4 border-t border-gray-200">
             <Button
               onClick={handleLogout}
               variant="ghost"
@@ -253,12 +247,7 @@ export function Sidebar({
           {/* Mobile header */}
           <div className="flex items-center justify-between px-4 py-4 border-b border-gray-200">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                <Truck className="h-5 w-5 text-white" />
-              </div>
-              <span className="text-lg font-semibold text-gray-900">
-                Delivery Hub
-              </span>
+              <img src="/caremall.png" alt="CareMall Logo" className="h-8 object-contain" />
             </div>
             <Button
               variant="ghost"
@@ -278,12 +267,12 @@ export function Sidebar({
                   src={manager?.assignedWarehouses?.[0]?.hubImage}
                   className="object-cover"
                 />
-                <AvatarFallback className="bg-red-600 text-white text-sm font-black italic">
+                <AvatarFallback className="bg-red-600 text-white text-sm font-semibold italic">
                   {manager?.fullName?.charAt(0) || "M"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-black text-gray-900 truncate tracking-tight">
+                <p className="text-[13px] font-semibold text-gray-900 truncate tracking-tight">
                   {manager?.fullName || "Manager"}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
@@ -299,7 +288,7 @@ export function Sidebar({
           </nav>
 
           {/* Mobile logout */}
-          <div className="flex-shrink-0 px-2 py-4 border-t border-gray-200">
+          <div className="shrink-0 px-2 py-4 border-t border-gray-200">
             <Button
               onClick={handleLogout}
               variant="ghost"

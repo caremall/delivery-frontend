@@ -8,19 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
     Search,
-    Filter,
     MoreHorizontal,
     Plus,
-    CalendarDays,
-    X,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { DateRange } from "react-day-picker";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -220,11 +213,6 @@ export default function PendingOrdersPage() {
     const queryClient = useQueryClient();
     const [search, setSearch] = useState("");
     const [debouncedSearch, setDebouncedSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("pending");
-    const [dateRange, setDateRange] = useState<DateRange | undefined>({
-        from: undefined,
-        to: undefined,
-    });
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
     const [assigningOrderId, setAssigningOrderId] = useState<string | null>(null);
@@ -237,19 +225,12 @@ export default function PendingOrdersPage() {
         return () => clearTimeout(timer);
     }, [search]);
 
-    const {
-        data: ordersData,
-        isLoading,
-        isError,
-        refetch,
-    } = useQuery({
-        queryKey: ["pendingOrders", debouncedSearch, statusFilter, dateRange, page, limit],
+    const { data: ordersData, isLoading } = useQuery({
+        queryKey: ["pendingOrders", debouncedSearch, page, limit],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (debouncedSearch) params.append("search", debouncedSearch);
-            if (statusFilter) params.append("status", statusFilter);
-            if (dateRange?.from) params.append("startDate", dateRange.from.toISOString());
-            if (dateRange?.to) params.append("endDate", dateRange.to.toISOString());
+            params.append("status", "pending");
             params.append("page", String(page));
             params.append("limit", String(limit));
             const res = await axiosInstance.get(`/orders?${params.toString()}`);
@@ -287,7 +268,7 @@ export default function PendingOrdersPage() {
         {
             accessorKey: "orderId",
             header: "Order ID",
-            cell: ({ row }) => <span className="font-bold text-[#111827] text-sm tracking-wide">{row.original.orderId}</span>,
+            cell: ({ row }) => <span className="font-medium text-[#111827] text-sm tracking-wide">{row.original.orderId}</span>,
         },
         {
             accessorKey: "shippingAddress.fullName",
@@ -345,7 +326,7 @@ export default function PendingOrdersPage() {
                             </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100 p-1">
-                            <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-gray-500 uppercase">Actions</DropdownMenuLabel>
+                            <DropdownMenuLabel className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <Link href={`/orders/${row.original._id}`}>
                                 <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">View Details</DropdownMenuItem>
@@ -361,93 +342,20 @@ export default function PendingOrdersPage() {
     ];
 
     return (
-        <div className="flex flex-col min-h-screen bg-[#f9fafb] p-6 lg:p-10 space-y-10">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                <div className="space-y-1">
-                    <h1 className="text-3xl font-extrabold text-[#111827] tracking-tight">Pending Orders</h1>
-                    <p className="text-gray-500 text-sm">Manage orders that are waiting to be processed and assigned to riders.</p>
+        <div className="flex flex-col min-h-screen bg-[#f9fafb] p-6 lg:p-8 space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-lg font-semibold text-gray-800 tracking-tight">Pending Orders</h1>
+                    <p className="text-[12px] text-gray-400 mt-0.5">Orders waiting to be processed and assigned to riders</p>
                 </div>
-            </div>
-
-            <div className="flex flex-col lg:flex-row lg:items-center justify-end gap-6">
-                <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-xl border border-gray-100 shadow-sm">
-                        <span className="text-sm font-semibold text-gray-600">Total Pending</span>
-                        <span className="bg-red-50 text-red-600 font-bold px-3 py-1 rounded-lg text-sm">
-                            {String(ordersToAssignCount).padStart(2, '0')}
+                {ordersToAssignCount > 0 && (
+                    <div className="flex items-center gap-2 bg-white border border-orange-100 px-4 py-2 rounded-xl shadow-sm">
+                        <span className="w-2 h-2 rounded-full bg-orange-400" />
+                        <span className="text-[12px] font-medium text-gray-600">
+                            <span className="text-orange-600 font-semibold">{ordersToAssignCount}</span> unassigned
                         </span>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="h-11 px-5 rounded-xl border-gray-200 bg-white gap-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
-                                    <CalendarDays className="h-4.5 w-4.5 text-gray-400" />
-                                    {dateRange?.from ? (
-                                        dateRange.to ? (
-                                            <>
-                                                {format(dateRange.from, "LLL dd, y")} -{" "}
-                                                {format(dateRange.to, "LLL dd, y")}
-                                            </>
-                                        ) : (
-                                            format(dateRange.from, "LLL dd, y")
-                                        )
-                                    ) : (
-                                        <span>Pick a date range</span>
-                                    )}
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="end">
-                                <Calendar
-                                    initialFocus
-                                    mode="range"
-                                    defaultMonth={dateRange?.from}
-                                    selected={dateRange}
-                                    onSelect={(range) => {
-                                        setDateRange(range);
-                                        if (range?.from && range?.to) {
-                                            setPage(1);
-                                        }
-                                    }}
-                                    numberOfMonths={2}
-                                />
-                            </PopoverContent>
-                        </Popover>
-
-                        {dateRange?.from && (
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setDateRange(undefined)}
-                                className="h-11 w-11 rounded-xl text-gray-400 hover:text-red-600"
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        )}
-                    </div>
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="h-11 px-5 rounded-xl border-gray-200 bg-white gap-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all shadow-sm">
-                                <Filter className="h-4.5 w-4.5 text-gray-400" />
-                                {statusFilter ? statusFilters.find(f => f.value === statusFilter)?.label : "Filter By Status"}
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-[200px] rounded-xl shadow-xl border-gray-100 p-1">
-                            <DropdownMenuLabel className="px-3 py-2 text-xs font-bold text-gray-500 uppercase">Status</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            {statusFilters.map((f) => (
-                                <DropdownMenuItem
-                                    key={f.value}
-                                    onClick={() => { setStatusFilter(f.value); setPage(1); }}
-                                    className={cn("cursor-pointer rounded-lg mx-1 px-3 py-2 text-sm", statusFilter === f.value ? "bg-red-50 text-red-600 font-semibold" : "")}
-                                >
-                                    {f.label}
-                                </DropdownMenuItem>
-                            ))}
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                </div>
+                )}
             </div>
 
             <Card className="bg-white border-none rounded-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] overflow-hidden">
@@ -458,17 +366,22 @@ export default function PendingOrdersPage() {
                         isLoading={isLoading}
                         manualPagination={true}
                         pageCount={pagination?.totalPages || 0}
-                        pagination={{
-                            pageIndex: page - 1,
-                            pageSize: limit
-                        }}
-                        onPaginationChange={(newPagination) => {
-                            setPage(newPagination.pageIndex + 1);
-                            setLimit(newPagination.pageSize);
-                        }}
-                        onSearch={(term) => {
-                            setSearch(term);
-                        }}
+                        pagination={{ pageIndex: page - 1, pageSize: limit }}
+                        onPaginationChange={(p) => { setPage(p.pageIndex + 1); setLimit(p.pageSize); }}
+                        onSearch={(term) => setSearch(term)}
+                        filters={[
+                            {
+                                type: "select",
+                                column: "orderStatus",
+                                placeholder: "Filter by Status",
+                                options: statusFilters.map(f => ({ value: f.value, label: f.label })),
+                            },
+                            {
+                                type: "date",
+                                column: "createdAt",
+                                placeholder: "Filter by Date",
+                            },
+                        ]}
                     />
                 </CardContent>
             </Card>
