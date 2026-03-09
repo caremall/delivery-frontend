@@ -25,13 +25,6 @@ export default function PerformanceChart({ data, isLoading }: { data?: any[], is
 
     return (
         <Card className="rounded-xl border border-gray-100 shadow-sm bg-white h-full flex flex-col pt-0">
-            <CardHeader className="px-5 py-4 border-b border-gray-50 flex flex-row items-center justify-between">
-                <CardTitle className="text-[14px] font-medium text-gray-800">Revenue</CardTitle>
-                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-medium text-gray-400 hover:bg-gray-50 transition-colors">
-                    All Categories <ChevronDown className="h-4 w-4" />
-                </button>
-            </CardHeader>
-
             <CardContent className="p-6 flex flex-col h-full bg-white">
                 <div className="flex items-center justify-between mb-8">
                     <h3 className="text-sm font-medium text-gray-900">Revenue Volume</h3>
