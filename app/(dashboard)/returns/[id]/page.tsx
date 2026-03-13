@@ -1,10 +1,10 @@
 import React from "react";
 import ReturnDetailsClient from "./ReturnDetailsClient";
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
-    return [];
+    return [{ id: "1" }];
 }
 
 export default async function ReturnDetailsPage({

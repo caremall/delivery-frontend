@@ -3,10 +3,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { ArrowLeft, Package, Calendar, User, MapPin, CreditCard } from "lucide-react";
 import Link from "next/link";
 
-export const dynamicParams = true;
+export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  return [];
+  return [{ id: "1" }];
 }
 
 export default async function OrderDetailsPage({
