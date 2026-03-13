@@ -3,7 +3,7 @@ name: Deploy Delivery Frontend
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   deploy:
