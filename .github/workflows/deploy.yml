@@ -10,10 +10,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: delivery-frontend
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -34,7 +30,7 @@ jobs:
       - name: Build Next.js project
         run: pnpm run build
 
-      - name: Verify export folder
+      - name: Check build output
         run: ls -la out
 
       - name: Configure AWS credentials
