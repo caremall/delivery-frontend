@@ -4,10 +4,15 @@ on:
   push:
     branches:
       - main
+      - master
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: delivery-frontend
 
     steps:
       - name: Checkout repo
@@ -16,9 +21,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20 
+          node-version: 22
 
-      - name: Install pnpm
+      - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 9
@@ -28,6 +33,9 @@ jobs:
 
       - name: Build Next.js project
         run: pnpm run build
+
+      - name: Verify export folder
+        run: ls -la out
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -51,4 +59,3 @@ jobs:
           aws cloudfront create-invalidation \
           --distribution-id $CLEAN_CF_ID \
           --paths "/*"
-
