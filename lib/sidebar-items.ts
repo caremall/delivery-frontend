@@ -98,11 +98,6 @@ export const navigation = [
                 icon: UserCheck,
                 href: "/riders/active",
             },
-            {
-                name: "Performance",
-                icon: BarChart3,
-                href: "/riders/performance",
-            },
         ],
     },
     {

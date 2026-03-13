@@ -163,7 +163,7 @@ function RiderAssignSelect({
                         )}
                         disabled={isAssigning}
                     >
-                        {isAssigning ? "Assigning..." : currentRiderName || "Assign Rider +"}
+                        {isAssigning ? "Assigning..." : currentRiderName || "Assign Rider"}
                         {!isAssigning && !currentRiderName && <Plus className="h-4 w-4" />}
                     </button>
                 </DropdownMenuTrigger>
