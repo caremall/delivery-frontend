@@ -13,6 +13,7 @@ import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 export default function ReturnsTable() {
     const [page, setPage] = useState(1);
@@ -74,12 +75,14 @@ export default function ReturnsTable() {
             accessorKey: "returnId",
             header: "Return ID",
             cell: ({ row }) => (
-                <div className="flex flex-col">
-                    <span className="text-[13px] font-mono font-bold text-indigo-600">{row.original.returnId}</span>
-                    <span className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
-                        Order: {row.original.order?.orderId || "N/A"}
-                    </span>
-                </div>
+                <Link href={`/returns/${row.original._id}`} className="group">
+                    <div className="flex flex-col">
+                        <span className="text-[13px] font-mono font-medium text-indigo-600 group-hover:text-red-500 transition-colors underline-offset-4 group-hover:underline">{row.original.returnId}</span>
+                        <span className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
+                            Order: {row.original.order?.orderId || "N/A"}
+                        </span>
+                    </div>
+                </Link>
             )
         },
         {
@@ -89,7 +92,7 @@ export default function ReturnsTable() {
                 const rtn = row.original;
                 return (
                     <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 flex-shrink-0 flex items-center justify-center overflow-hidden">
+                        <div className="h-10 w-10 rounded-lg bg-gray-50 border border-gray-100 shrink-0 flex items-center justify-center overflow-hidden">
                             {rtn.item?.product?.productImages?.[0] ? (
                                 <img src={rtn.item.product.productImages[0]} alt="" className="h-full w-full object-cover" />
                             ) : (
@@ -97,7 +100,7 @@ export default function ReturnsTable() {
                             )}
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-[13px] font-semibold text-gray-800 truncate block">
+                            <span className="text-[13px] font-medium text-gray-800 truncate block">
                                 {rtn.item?.product?.productName}
                             </span>
                             <span className="text-[10px] text-gray-400 truncate block">
@@ -113,7 +116,7 @@ export default function ReturnsTable() {
             header: "Customer",
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="text-[13px] font-medium text-gray-800 flex items-center gap-1.5">
+                    <span className="text-[13px] font-normal text-gray-800 flex items-center gap-1.5">
                         <UserIcon className="h-3 w-3 text-gray-400" />
                         {row.original.user?.name || "Customer"}
                     </span>
@@ -126,11 +129,21 @@ export default function ReturnsTable() {
             header: "Requested At",
             cell: ({ row }) => (
                 <div className="flex flex-col">
-                    <span className="text-[12px] font-medium text-gray-700 flex items-center gap-1.5">
+                    <span className="text-[12px] font-normal text-gray-600 flex items-center gap-1.5">
                         <Calendar className="h-3 w-3 text-gray-400" />
                         {formatDate(row.original.updatedAt)}
                     </span>
                 </div>
+            )
+        },
+        {
+            accessorKey: "returnType",
+            header: "Type",
+            cell: ({ row }) => (
+                <Badge variant="outline" className={cn("px-2 py-0.5 rounded-lg text-[10px] font-medium uppercase border-none", 
+                    row.original.returnType === 'replacement' ? "bg-purple-100/50 text-purple-700" : "bg-blue-100/50 text-blue-700")}>
+                    {row.original.returnType === 'return' ? 'refund' : row.original.returnType}
+                </Badge>
             )
         },
         {
@@ -160,8 +173,8 @@ export default function ReturnsTable() {
                             <AvatarFallback><UserCircle className="w-4 h-4 text-gray-400" /></AvatarFallback>
                         </Avatar>
                         <div className="flex flex-col">
-                            <span className="text-[11px] font-bold">{r.name}</span>
-                            <span className="text-[9px] text-gray-500">{r.phone}</span>
+                            <span className="text-[11px] font-medium text-gray-700">{r.name}</span>
+                            <span className="text-[9px] text-gray-400">{r.phone}</span>
                         </div>
                     </div>
                 );
@@ -172,9 +185,22 @@ export default function ReturnsTable() {
             header: "Status",
             cell: ({ row }) => (
                 <div className="flex justify-end pr-4">
-                    <Badge variant="outline" className={cn("px-3 py-0.5 rounded-full text-[10px] font-bold capitalize border-none", getStatusStyle(row.original.status))}>
+                    <Badge variant="outline" className={cn("px-3 py-0.5 rounded-full text-[10px] font-medium capitalize border-none", getStatusStyle(row.original.status))}>
                         {row.original.status}
                     </Badge>
+                </div>
+            )
+        },
+        {
+            id: "actions",
+            header: "",
+            cell: ({ row }) => (
+                <div className="flex justify-end pr-4">
+                    <Link href={`/returns/${row.original._id}`}>
+                        <Button variant="ghost" size="sm" className="text-[11px] font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
+                            View Details
+                        </Button>
+                    </Link>
                 </div>
             )
         }
@@ -188,7 +214,7 @@ export default function ReturnsTable() {
                         <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center">
                             <Truck className="h-5 w-5 text-red-500" />
                         </div>
-                        Assigned Replacement Requests
+                        Assigned Return Requests
                     </CardTitle>
                     <div className="flex items-center gap-2">
                         <select
@@ -229,7 +255,7 @@ export default function ReturnsTable() {
             <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Assign Rider for Replacement Pickup</DialogTitle>
+                        <DialogTitle>Assign Rider for Return Pickup</DialogTitle>
                     </DialogHeader>
                     <div className="py-4 font-mono text-sm text-gray-500 mb-2 border-b">
                         Return ID: <span className="font-bold text-indigo-600">{selectedReturnDoc?.returnId}</span>
