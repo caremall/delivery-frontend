@@ -30,7 +30,7 @@ jobs:
       - name: Build Next.js project
         run: pnpm run build
 
-      - name: Check build output
+      - name: Verify export folder
         run: ls -la out
 
       - name: Configure AWS credentials
@@ -41,17 +41,13 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Upload build to S3
-        env:
-          S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
         run: |
-          CLEAN_BUCKET=$(echo "$S3_BUCKET" | xargs)
+          CLEAN_BUCKET=$(echo "${{ secrets.AWS_S3_BUCKET }}" | xargs)
           aws s3 sync out s3://$CLEAN_BUCKET --delete
 
       - name: Invalidate CloudFront cache
-        env:
-          CF_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
         run: |
-          CLEAN_CF_ID=$(echo "$CF_ID" | xargs)
+          CLEAN_CF_ID=$(echo "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" | xargs)
           aws cloudfront create-invalidation \
-          --distribution-id $CLEAN_CF_ID \
-          --paths "/*"
+            --distribution-id $CLEAN_CF_ID \
+            --paths "/*"
