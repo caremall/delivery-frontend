@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - main
-      - jaisaldev
       - master
+      - jaisaldev
 
 jobs:
   deploy:
