@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",   // 👈 REQUIRED for S3 static hosting
+  output: "export",
 
   images: {
-    unoptimized: true,   // 👈 required when using static export
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
