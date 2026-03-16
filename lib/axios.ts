@@ -1,6 +1,7 @@
 import axios from "axios";
 
-export const API_URL = "https://delivery.api.caremallonline.com/api/v1";
+// export const API_URL = "https://delivery.api.caremallonline.com/api/v1";
+export const API_URL = "http://localhost:5001/api/v1";
 
 const axiosInstance = axios.create({
     baseURL: API_URL,

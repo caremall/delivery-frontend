@@ -276,16 +276,19 @@ export default function AllOrdersPage() {
     {
       accessorKey: "orderId",
       header: "Order ID",
-      cell: ({ row }) => <span className="font-medium text-[#111827] text-sm tracking-wide">{row.original.orderId}</span>,
+      enableSorting: false,
+      cell: ({ row }) => <span className="font-bold text-[#111827] text-sm tracking-wide">{row.original.orderId}</span>,
     },
     {
       accessorKey: "shippingAddress.fullName",
       header: "Customer Name",
+      enableSorting: false,
       cell: ({ row }) => <span className="text-[#374151] font-semibold text-sm">{row.original.shippingAddress?.fullName || "-"}</span>,
     },
     {
       accessorKey: "shippingAddress.address1",
       header: "Address",
+      enableSorting: false,
       cell: ({ row }) => (
         <span className="text-[#6b7280] text-sm max-w-[200px] truncate block" title={`${row.original.shippingAddress?.address1}, ${row.original.shippingAddress?.city}`}>
           {row.original.shippingAddress?.address1}, {row.original.shippingAddress?.city}
@@ -337,7 +340,7 @@ export default function AllOrdersPage() {
             <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100 p-1">
               <DropdownMenuLabel className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Actions</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <Link href={`/orders/${row.original._id}`}>
+              <Link href={`/orders/details?id=${row.original._id}`}>
                 <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">View Details</DropdownMenuItem>
               </Link>
               <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">Call Customer</DropdownMenuItem>
