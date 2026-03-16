@@ -102,6 +102,10 @@ export default function AllRidersPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [statusFilter] = useState("");
+  const [activeFilters, setActiveFilters] = useState<{ selectFilters: Record<string, string>; dateFilters: Record<string, { from?: string | Date; to?: string | Date }> }>({
+    selectFilters: {},
+    dateFilters: {},
+  });
   const [selectedRiderId, setSelectedRiderId] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -111,11 +115,27 @@ export default function AllRidersPage() {
   }, [search]);
 
   const { data: ridersData, isLoading } = useQuery({
-    queryKey: ["riders", debouncedSearch, statusFilter, page, limit],
+    queryKey: ["riders", debouncedSearch, activeFilters, page, limit],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (debouncedSearch) params.append("search", debouncedSearch);
-      if (statusFilter) params.append("status", statusFilter);
+      
+      // Apply select filters dynamically to query
+      if (activeFilters.selectFilters.status) {
+        params.append("status", activeFilters.selectFilters.status);
+      }
+      if (activeFilters.selectFilters.kyc_status) {
+        params.append("kyc_status", activeFilters.selectFilters.kyc_status);
+      }
+      
+      // Apply date filters dynamically
+      if (activeFilters.dateFilters.createdAt?.from) {
+        params.append("startDate", new Date(activeFilters.dateFilters.createdAt.from).toISOString());
+      }
+      if (activeFilters.dateFilters.createdAt?.to) {
+        params.append("endDate", new Date(activeFilters.dateFilters.createdAt.to).toISOString());
+      }
+
       params.append("page", String(page));
       params.append("limit", String(limit));
       return (await axiosInstance.get(`/riders?${params}`)).data.data;
@@ -132,6 +152,7 @@ export default function AllRidersPage() {
     {
       accessorKey: "name",
       header: "Rider",
+      enableSorting: false,
       cell: ({ row }) => {
         const { name, avatar } = row.original;
         return (
@@ -160,6 +181,7 @@ export default function AllRidersPage() {
     {
       accessorKey: "phone",
       header: "Contact",
+      enableSorting: false,
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="text-[13px] font-semibold text-gray-700">+91 {row.original.phone}</span>
@@ -227,6 +249,8 @@ export default function AllRidersPage() {
     },
     {
       id: "actions",
+      header: "Actions",
+      enableSorting: false,
       enableHiding: false,
       cell: ({ row }) => (
         <div className="text-right">
@@ -241,16 +265,6 @@ export default function AllRidersPage() {
               <DropdownMenuSeparator />
               <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-[12px] font-medium" onClick={() => setSelectedRiderId(row.original._id)}>
                 View Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-[12px] font-medium">
-                Live Tracking
-              </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-[12px] font-medium">
-                Payment History
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-[12px] font-semibold text-red-500 focus:bg-red-50 focus:text-red-600">
-                Suspend Rider
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -349,6 +363,7 @@ export default function AllRidersPage() {
           pagination={{ pageIndex: page - 1, pageSize: limit }}
           onPaginationChange={(p) => { setPage(p.pageIndex + 1); setLimit(p.pageSize); }}
           onSearch={(term) => setSearch(term)}
+          onFilterChange={(filters) => setActiveFilters(filters as any)}
           filters={tableFilters}
           exportFileName="caremall_rider_fleet"
         />

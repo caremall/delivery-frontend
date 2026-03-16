@@ -33,6 +33,7 @@ export const columns: ColumnDef<any>[] = [
   {
     accessorKey: "productName",
     header: "Product Name",
+    enableSorting: false, 
     cell: ({ row }) => {
       const { productName, image } = row.original;
 
@@ -85,6 +86,7 @@ export const columns: ColumnDef<any>[] = [
   },
   {
     id: "actions",
+    header: "Actions", 
     enableHiding: false,
     cell: ({ row }) => {
       const product = row.original;

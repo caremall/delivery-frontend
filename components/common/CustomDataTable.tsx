@@ -63,6 +63,8 @@ interface CustomDataTableProps<TData, TValue> {
   onSearch?: (term: string) => void // Callback for server-side search
   hideRowSelectionInfo?: boolean // Prop to hide "X of Y rows selected"
   isLoading?: boolean
+  customToolbarItem?: React.ReactNode // Rendered to the left of the Columns button
+  onFilterChange?: (filters: { selectFilters: Record<string, string>; dateFilters: Record<string, { from?: Date; to?: Date }> }) => void
 }
 
 
@@ -143,6 +145,8 @@ export function CustomDataTable<TData, TValue>({
   onSearch,
   hideRowSelectionInfo = true,
   isLoading = false,
+  customToolbarItem,
+  onFilterChange,
 }: CustomDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -161,6 +165,15 @@ export function CustomDataTable<TData, TValue>({
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [dateFilters, setDateFilters] = React.useState<Record<string, { from?: Date; to?: Date }>>({})
   const [selectFilters, setSelectFilters] = React.useState<Record<string, string>>({})
+
+  const onFilterChangeRef = React.useRef(onFilterChange)
+  React.useEffect(() => {
+    onFilterChangeRef.current = onFilterChange
+  }, [onFilterChange])
+
+  React.useEffect(() => {
+    onFilterChangeRef.current?.({ selectFilters, dateFilters })
+  }, [selectFilters, dateFilters])
 
   // Handle pagination changes
   const handlePaginationChange = React.useCallback(
@@ -369,6 +382,8 @@ export function CustomDataTable<TData, TValue>({
         )}
 
         <div className="ml-auto flex gap-2 items-center">
+          {customToolbarItem}
+          
           {/* Columns Visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

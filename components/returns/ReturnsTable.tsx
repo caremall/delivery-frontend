@@ -140,7 +140,7 @@ export default function ReturnsTable() {
             accessorKey: "returnType",
             header: "Type",
             cell: ({ row }) => (
-                <Badge variant="outline" className={cn("px-2 py-0.5 rounded-lg text-[10px] font-medium uppercase border-none", 
+                <Badge variant="outline" className={cn("px-2 py-0.5 rounded-lg text-[10px] font-medium uppercase border-none",
                     row.original.returnType === 'replacement' ? "bg-purple-100/50 text-purple-700" : "bg-blue-100/50 text-blue-700")}>
                     {row.original.returnType === 'return' ? 'refund' : row.original.returnType}
                 </Badge>
@@ -216,22 +216,6 @@ export default function ReturnsTable() {
                         </div>
                         Assigned Return Requests
                     </CardTitle>
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={status}
-                            onChange={(e) => {
-                                setStatus(e.target.value);
-                                setPage(1);
-                            }}
-                            className="h-10 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium outline-none focus:ring-2 focus:ring-red-500/20"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="requested">Requested</option>
-                            <option value="approved">Approved</option>
-                            <option value="completed">Completed</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
                 </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -248,6 +232,22 @@ export default function ReturnsTable() {
                     onPaginationChange={(p) => {
                         setPage(p.pageIndex + 1);
                     }}
+                    customToolbarItem={
+                        <select
+                            value={status}
+                            onChange={(e) => {
+                                setStatus(e.target.value);
+                                setPage(1);
+                            }}
+                            className="h-10 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium outline-none focus:ring-2 focus:ring-red-500/20 cursor-pointer"
+                        >
+                            <option value="all">All Status</option>
+                            <option value="requested">Requested</option>
+                            <option value="approved">Approved</option>
+                            <option value="completed">Completed</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    }
                 />
             </CardContent>
 

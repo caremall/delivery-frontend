@@ -105,7 +105,11 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Full name *</Label>
                                     <Input
-                                        {...register("name", { required: "Name is required" })}
+                                        {...register("name", { 
+                                            required: "Name is required",
+                                            minLength: { value: 2, message: "Name must be at least 2 characters" },
+                                            pattern: { value: /^[A-Za-z\s]+$/, message: "Name can only contain letters and spaces" }
+                                        })}
                                         placeholder="Enter full name"
                                         className="h-11 rounded-xl border-gray-100 bg-gray-50/50"
                                     />
@@ -114,8 +118,11 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Mobile Number *</Label>
                                     <Input
-                                        {...register("phone", { required: "Phone is required" })}
-                                        type="number"
+                                        {...register("phone", { 
+                                            required: "Phone is required",
+                                            pattern: { value: /^[0-9]{10}$/, message: "Phone number must be exactly 10 digits" }
+                                        })}
+                                        type="tel"
                                         placeholder="10 digit number"
                                         className="h-11 rounded-xl border-gray-100 bg-gray-50/50"
                                     />
@@ -124,11 +131,17 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Email (Optional)</Label>
                                     <Input
-                                        {...register("email")}
+                                        {...register("email", {
+                                            pattern: {
+                                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                                message: "Invalid email address"
+                                            }
+                                        })}
                                         type="email"
                                         placeholder="rider@example.com"
                                         className="h-11 rounded-xl border-gray-100 bg-gray-50/50"
                                     />
+                                    {errors.email && <p className="text-[10px] text-red-500 font-medium">{errors.email?.message as string}</p>}
                                 </div>
                                 <div className="space-y-1.5">
                                     <Label className="text-[10px] font-medium uppercase text-gray-400 tracking-wider">Avatar URL</Label>
