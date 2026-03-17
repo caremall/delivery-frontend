@@ -374,19 +374,19 @@ export default function PendingOrdersPage() {
                         pagination={{ pageIndex: page - 1, pageSize: limit }}
                         onPaginationChange={(p) => { setPage(p.pageIndex + 1); setLimit(p.pageSize); }}
                         onSearch={(term) => setSearch(term)}
-                        filters={[
-                            {
-                                type: "select",
-                                column: "orderStatus",
-                                placeholder: "Filter by Status",
-                                options: statusFilters.map(f => ({ value: f.value, label: f.label })),
-                            },
-                            {
-                                type: "date",
-                                column: "createdAt",
-                                placeholder: "Filter by Date",
-                            },
-                        ]}
+                        // filters={[
+                        //     {
+                        //         type: "select",
+                        //         column: "orderStatus",
+                        //         placeholder: "Filter by Status",
+                        //         options: statusFilters.map(f => ({ value: f.value, label: f.label })),
+                        //     },
+                        //     {
+                        //         type: "date",
+                        //         column: "createdAt",
+                        //         placeholder: "Filter by Date",
+                        //     },
+                        // ]}
                         onFilterChange={(filters) => {
                             setDateRange(filters.dateFilters.createdAt || {});
                             setPage(1);
