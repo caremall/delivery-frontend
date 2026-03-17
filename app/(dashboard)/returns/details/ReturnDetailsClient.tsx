@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Package, User, Building2, Calendar, CreditCard, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,17 +15,16 @@ import { cn } from "@/lib/utils";
 import { getReturnById, updateReturnItemStatus, assignRiderToReturn, updateReplacementDeliveryStatus } from "@/lib/api/returns";
 import axiosInstance from "@/lib/axios";
 
-interface ReturnDetailsClientProps {
-    id: string;
-}
-
-export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
+export default function ReturnDetailsClient() {
+    const searchParams = useSearchParams();
+    const id = searchParams.get("id") || "";
     const router = useRouter();
     const queryClient = useQueryClient();
 
     const { data: response, isLoading } = useQuery({
         queryKey: ["returnDetails", id],
         queryFn: () => getReturnById(id),
+        enabled: !!id,
     });
 
     const returnData = response?.data;
@@ -79,7 +78,7 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
         );
     }
 
-    if (!returnData) {
+    if (!returnData || !id) {
         return (
             <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
                 <div className="text-center space-y-4">
@@ -122,7 +121,6 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="max-w-7xl mx-auto">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-4">
                         <Button
@@ -156,10 +154,7 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    {/* Left Column */}
                     <div className="lg:col-span-2 space-y-6">
-                        
-                        {/* Return Information */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg">Return Information</CardTitle>
@@ -208,7 +203,6 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                     )}
                                 </div>
 
-                                {/* Images */}
                                 {returnData?.images && returnData.images.length > 0 && (
                                     <div>
                                         <span className="text-sm text-muted-foreground block mb-2">
@@ -229,7 +223,6 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                             </CardContent>
                         </Card>
 
-                        {/* Product Information */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg flex items-center gap-2">
@@ -264,21 +257,11 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                                 <p className="font-medium">₹{returnData?.item?.priceAtOrder}</p>
                                             </div>
                                         </div>
-                                        {variant?.variantAttributes && (
-                                            <div className="flex flex-wrap gap-2 pt-2">
-                                                {variant.variantAttributes.map((attr: any, i: number) => (
-                                                    <span key={i} className="px-2 py-0.5 rounded-lg bg-gray-100 text-[10px] font-medium text-gray-600 capitalize">
-                                                        {attr.name}: {attr.value}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                        )}
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
-                        {/* Logistics Information (Common for both) */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg flex items-center gap-2">
@@ -309,7 +292,6 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                     </div>
                                 </div>
 
-                                {/* Assigned Rider */}
                                 {returnData?.rider ? (
                                     <div className="pt-3 border-t">
                                         <span className="text-sm text-muted-foreground block mb-2">Assigned Rider</span>
@@ -336,87 +318,16 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                         <p className="text-sm text-muted-foreground mt-1 italic">No rider assigned</p>
                                     </div>
                                 )}
-
-                                <div className="grid grid-cols-2 gap-4 pt-3 border-t">
-                                    {isReplacement && (
-                                        <div>
-                                            <span className="text-sm text-muted-foreground">Replacement Delivery Status</span>
-                                            <div className="mt-1">
-                                                <Badge className="bg-gray-100 text-gray-700 border-0">
-                                                    {returnData?.replacementDeliveryStatus || "pending"}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                    )}
-                                    <div>
-                                        <span className="text-sm text-muted-foreground">Pickup Status</span>
-                                        <div className="mt-1">
-                                            <Badge className="bg-gray-100 text-gray-700 border-0 capitalize">
-                                                {returnData?.pickupStatus || "pending"}
-                                            </Badge>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                {returnData?.deliveryHub?.address && (
-                                    <div className="pt-3 border-t">
-                                        <span className="text-sm text-muted-foreground block mb-1">Hub Address</span>
-                                        {typeof returnData.deliveryHub.address === 'object' ? (
-                                            <p className="text-sm">
-                                                {returnData.deliveryHub.address.street}, {returnData.deliveryHub.address.city}, {returnData.deliveryHub.address.state} - {returnData.deliveryHub.address.pinCode}
-                                            </p>
-                                        ) : (
-                                            <p className="text-sm">{returnData.deliveryHub.address}</p>
-                                        )}
-                                    </div>
-                                )}
                             </CardContent>
                         </Card>
-                        {/* Refund Information */}
-                        {!isReplacement && (
-                            <Card>
-                                <CardHeader className="pb-4">
-                                    <CardTitle className="text-lg flex items-center gap-2">
-                                        <CreditCard className="h-5 w-5" />
-                                        Refund Information
-                                    </CardTitle>
-                                </CardHeader>
-                                <CardContent className="space-y-3">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <span className="text-sm text-muted-foreground">Refund Status</span>
-                                            <div className="mt-1">
-                                                <Badge className="bg-orange-50 text-orange-700 border-0">
-                                                    {returnData?.refundStatus?.replace(/_/g, " ") || "pending"}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <span className="text-sm text-muted-foreground">Refund Amount</span>
-                                            <p className="font-bold text-lg">₹{returnData?.refundAmount || 0}</p>
-                                        </div>
-                                    </div>
-                                    {returnData?.refundedAt && (
-                                        <div>
-                                            <span className="text-sm text-muted-foreground">Refunded At</span>
-                                            <p className="font-medium">
-                                                {new Date(returnData.refundedAt).toLocaleString()}
-                                            </p>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        )}
                     </div>
 
-                    {/* Right Column - Actions */}
                     <div className="space-y-6">
                         <Card className="border-primary/20 bg-primary/5">
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg">Update Status</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                {/* Update Return Item Status */}
                                 <div className="space-y-2">
                                     <Label>Return Item Status</Label>
                                     <Select
@@ -437,7 +348,6 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                     </Select>
                                 </div>
 
-                                {/* Assign Rider */}
                                 <div className="space-y-2 pt-3 border-t border-gray-100">
                                     <Label>Assign Delivery Rider</Label>
                                     <Select
@@ -457,31 +367,9 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                         </SelectContent>
                                     </Select>
                                 </div>
-
-                                {/* Replacement Delivery Status */}
-                                {isReplacement && (
-                                    <div className="space-y-2 pt-3 border-t border-gray-100">
-                                        <Label>Replacement Delivery Status</Label>
-                                        <Select
-                                            value={returnData.replacementDeliveryStatus || "pending"}
-                                            onValueChange={(val) => updateReplacementStatusMutation.mutate({ status: val })}
-                                            disabled={updateReplacementStatusMutation.isPending}
-                                        >
-                                            <SelectTrigger className="bg-white border-gray-200">
-                                                <SelectValue placeholder="Select Status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="pending">Pending</SelectItem>
-                                                <SelectItem value="sent">Sent</SelectItem>
-                                                <SelectItem value="received">Received</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                )}
                             </CardContent>
                         </Card>
 
-                        {/* Order info */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg">Order Information</CardTitle>
@@ -490,40 +378,6 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                 <div>
                                     <span className="text-sm text-muted-foreground">Order ID</span>
                                     <p className="font-medium font-mono">{returnData?.order?.orderId}</p>
-                                </div>
-                                <div>
-                                    <span className="text-sm text-muted-foreground">Order Status</span>
-                                    <p className="font-medium capitalize">{returnData?.order?.orderStatus}</p>
-                                </div>
-                                <div>
-                                    <span className="text-sm text-muted-foreground">Order Date</span>
-                                    <p className="font-medium">
-                                        {returnData?.order?.createdAt ? new Date(returnData.order.createdAt).toLocaleDateString() : "N/A"}
-                                    </p>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        {/* Customer Information */}
-                        <Card>
-                            <CardHeader className="pb-4">
-                                <CardTitle className="text-lg flex items-center gap-2">
-                                    <User className="h-5 w-5" />
-                                    Customer Details
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <div>
-                                    <span className="text-sm text-muted-foreground">Customer Name</span>
-                                    <p className="font-medium">{returnData?.user?.name}</p>
-                                </div>
-                                <div>
-                                    <span className="text-sm text-muted-foreground">Phone</span>
-                                    <p className="font-medium">{returnData?.user?.phone}</p>
-                                </div>
-                                <div>
-                                    <span className="text-sm text-muted-foreground">Email</span>
-                                    <p className="font-medium truncate">{returnData?.user?.email}</p>
                                 </div>
                             </CardContent>
                         </Card>

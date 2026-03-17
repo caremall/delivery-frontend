@@ -75,7 +75,7 @@ export default function ReturnsTable() {
             accessorKey: "returnId",
             header: "Return ID",
             cell: ({ row }) => (
-                <Link href={`/returns/${row.original._id}`} className="group">
+                <Link href={`/returns/details?id=${row.original._id}`} className="group">
                     <div className="flex flex-col">
                         <span className="text-[13px] font-mono font-medium text-indigo-600 group-hover:text-red-500 transition-colors underline-offset-4 group-hover:underline">{row.original.returnId}</span>
                         <span className="text-[10px] text-gray-400 mt-0.5 flex items-center gap-1">
@@ -196,7 +196,7 @@ export default function ReturnsTable() {
             header: "",
             cell: ({ row }) => (
                 <div className="flex justify-end pr-4">
-                    <Link href={`/returns/${row.original._id}`}>
+                    <Link href={`/returns/details?id=${row.original._id}`}>
                         <Button variant="ghost" size="sm" className="text-[11px] font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
                             View Details
                         </Button>
