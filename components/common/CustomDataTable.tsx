@@ -337,8 +337,11 @@ export function CustomDataTable<TData, TValue>({
     setSelectFilters({})
     setDateFilters({})
     setGlobalFilter("")
+    if (onSearch) {
+      onSearch("")
+    }
     table.setPageIndex(0)
-  }, [table])
+  }, [table, onSearch])
 
   const hasActiveFilters = Object.keys(selectFilters).length > 0 ||
     Object.values(dateFilters).some(range => range.from || range.to) ||

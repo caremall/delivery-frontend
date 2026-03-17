@@ -119,7 +119,7 @@ export default function AllRidersPage() {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (debouncedSearch) params.append("search", debouncedSearch);
-      
+
       // Apply select filters dynamically to query
       if (activeFilters.selectFilters.status) {
         params.append("status", activeFilters.selectFilters.status);
@@ -127,13 +127,15 @@ export default function AllRidersPage() {
       if (activeFilters.selectFilters.kyc_status) {
         params.append("kyc_status", activeFilters.selectFilters.kyc_status);
       }
-      
+
       // Apply date filters dynamically
       if (activeFilters.dateFilters.createdAt?.from) {
-        params.append("startDate", new Date(activeFilters.dateFilters.createdAt.from).toISOString());
+        const d = new Date(activeFilters.dateFilters.createdAt.from);
+        if (!isNaN(d.getTime())) params.append("startDate", d.toISOString());
       }
       if (activeFilters.dateFilters.createdAt?.to) {
-        params.append("endDate", new Date(activeFilters.dateFilters.createdAt.to).toISOString());
+        const d = new Date(activeFilters.dateFilters.createdAt.to);
+        if (!isNaN(d.getTime())) params.append("endDate", d.toISOString());
       }
 
       params.append("page", String(page));
