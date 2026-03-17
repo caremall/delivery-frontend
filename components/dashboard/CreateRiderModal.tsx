@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
@@ -33,6 +33,7 @@ interface CreateRiderModalProps {
 export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => {
     const queryClient = useQueryClient();
     const [selectedPaymentMode, setSelectedPaymentMode] = useState<string>("");
+    const [upiType, setUpiType] = useState<"id" | "number">("id");
 
     const {
         register,
@@ -70,6 +71,8 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
             toast.success("Rider created successfully!");
             queryClient.invalidateQueries({ queryKey: ["riders"] });
             reset();
+            setSelectedPaymentMode("");
+            setUpiType("id");
             onClose();
         },
         onError: (error: any) => {
@@ -81,6 +84,15 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
         mutation.mutate(data);
     };
 
+    // Reset local state when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            reset();
+            setSelectedPaymentMode("");
+            setUpiType("id");
+        }
+    }, [isOpen, reset]);
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="sm:max-w-[700px] p-0 rounded-2xl overflow-hidden border-none shadow-2xl">
@@ -88,7 +100,7 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                     <DialogTitle className="text-xl font-bold flex items-center gap-2">
                         <UserPlus className="h-6 w-6 text-red-500" />
                         Professional Rider Registration
-                    </DialogTitle>
+                    </DialogTitle> 
                     <p className="text-xs text-gray-400 mt-1">
                         Register a new rider with complete profile, KYC, and payment information.
                     </p>
@@ -234,14 +246,71 @@ export const CreateRiderModal = ({ isOpen, onClose }: CreateRiderModalProps) => 
                                 )}
 
                                 {selectedPaymentMode === 'upi' && (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-medium uppercase text-gray-400">UPI ID</Label>
-                                            <Input {...register("bankDetails.upiId")} placeholder="username@bank" className="bg-white" />
+                                    <div className="space-y-4 bg-gray-50 p-6 rounded-2xl border border-gray-100 animate-in fade-in zoom-in duration-200">
+                                        <div className="flex gap-3">
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    setUpiType('id');
+                                                    setValue("bankDetails.upiNumber", "");
+                                                }}
+                                                className={cn(
+                                                    "px-4 py-2 rounded-lg text-xs font-bold transition-all border",
+                                                    upiType === 'id' 
+                                                        ? "bg-gray-900 text-white border-gray-900 shadow-lg shadow-gray-200" 
+                                                        : "bg-white text-gray-400 border-gray-200 hover:bg-gray-100"
+                                                )}
+                                            >
+                                                UPI ID
+                                            </button>
+                                            <button 
+                                                type="button"
+                                                onClick={() => {
+                                                    setUpiType('number');
+                                                    setValue("bankDetails.upiId", "");
+                                                }}
+                                                className={cn(
+                                                    "px-4 py-2 rounded-lg text-xs font-bold transition-all border",
+                                                    upiType === 'number' 
+                                                        ? "bg-gray-900 text-white border-gray-900 shadow-lg shadow-gray-200" 
+                                                        : "bg-white text-gray-400 border-gray-200 hover:bg-gray-100"
+                                                )}
+                                            >
+                                                UPI Number
+                                            </button>
                                         </div>
-                                        <div className="space-y-1.5">
-                                            <Label className="text-[10px] font-medium uppercase text-gray-400">UPI Number</Label>
-                                            <Input {...register("bankDetails.upiNumber")} placeholder="Mob linked UPI" className="bg-white" />
+
+                                        <div className="space-y-1.5 animate-in slide-in-from-bottom-2 duration-300">
+                                            {upiType === 'id' ? (
+                                                <>
+                                                    <Label className="text-[10px] font-medium uppercase text-gray-400">UPI ID *</Label>
+                                                    <Input 
+                                                        {...register("bankDetails.upiId", { 
+                                                            required: upiType === 'id' ? "UPI ID is required" : false 
+                                                        })} 
+                                                        placeholder="username@bank" 
+                                                        className="bg-white h-11 rounded-xl" 
+                                                    />
+                                                    {(errors.bankDetails as any)?.upiId && (
+                                                        <p className="text-[10px] text-red-500 font-medium">{(errors.bankDetails as any).upiId.message}</p>
+                                                    )}
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Label className="text-[10px] font-medium uppercase text-gray-400">UPI Number *</Label>
+                                                    <Input 
+                                                        {...register("bankDetails.upiNumber", { 
+                                                            required: upiType === 'number' ? "UPI Number is required" : false,
+                                                            pattern: { value: /^[0-9]{10}$/, message: "Must be 10 digits" }
+                                                        })} 
+                                                        placeholder="Enter 10-digit number" 
+                                                        className="bg-white h-11 rounded-xl" 
+                                                    />
+                                                    {(errors.bankDetails as any)?.upiNumber && (
+                                                        <p className="text-[10px] text-red-500 font-medium">{(errors.bankDetails as any).upiNumber.message}</p>
+                                                    )}
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 )}
