@@ -305,24 +305,34 @@ export function CustomDataTable<TData, TValue>({
 
   // Optimized filter handlers
   const handleSelectFilterChange = React.useCallback((columnId: string, value: string) => {
+    let nextState: Record<string, string> = {}
     setSelectFilters(prev => {
+      const newState = { ...prev }
       if (value === "__all__") {
-        const newState = { ...prev }
         delete newState[columnId]
-        return newState
+      } else {
+        newState[columnId] = value
       }
-      return { ...prev, [columnId]: value }
+      nextState = newState
+      return newState
     })
+    // Notify parent outside of render/updater phase
+    onFilterChange?.({ selectFilters: nextState, dateFilters })
     table.setPageIndex(0) // Reset to first page when filter changes
-  }, [table])
+  }, [table, onFilterChange, dateFilters])
 
   const handleDateFilterChange = React.useCallback((columnId: string, range: { from?: Date; to?: Date } | undefined) => {
-    setDateFilters(prev => ({
-      ...prev,
-      [columnId]: range || {}
-    }))
+    const newRange = range || {}
+    let nextState: Record<string, { from?: Date; to?: Date }> = {}
+    setDateFilters(prev => {
+      const newState = { ...prev, [columnId]: newRange }
+      nextState = newState
+      return newState
+    })
+    // Notify parent outside of render/updater phase
+    onFilterChange?.({ selectFilters, dateFilters: nextState })
     table.setPageIndex(0)
-  }, [table])
+  }, [table, onFilterChange, selectFilters])
 
   const handleGlobalFilterChange = React.useCallback((value: string) => {
     setGlobalFilter(value)
@@ -337,11 +347,10 @@ export function CustomDataTable<TData, TValue>({
     setSelectFilters({})
     setDateFilters({})
     setGlobalFilter("")
-    if (onSearch) {
-      onSearch("")
-    }
+    onSearch?.("")
+    onFilterChange?.({ selectFilters: {}, dateFilters: {} })
     table.setPageIndex(0)
-  }, [table, onSearch])
+  }, [table, onFilterChange, onSearch])
 
   const hasActiveFilters = Object.keys(selectFilters).length > 0 ||
     Object.values(dateFilters).some(range => range.from || range.to) ||
