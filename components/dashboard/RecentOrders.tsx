@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Plus, ChevronDown, ChevronUp, IndianRupee, Package } from "lucide-react";
+import { Search, Plus, ChevronDown, ChevronUp, IndianRupee, Package, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
@@ -114,6 +114,17 @@ function RiderAssignSelect({
 export default function RecentOrders({ orders, isLoading }: { orders?: any[], isLoading: boolean }) {
     const queryClient = useQueryClient();
     const [assigningOrderId, setAssigningOrderId] = useState<string | null>(null);
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const filteredOrders = React.useMemo(() => {
+        if (!searchTerm) return orders || [];
+        const term = searchTerm.toLowerCase();
+        return (orders || []).filter(order => 
+            order.orderId?.toLowerCase().includes(term) ||
+            order.shippingAddress?.fullName?.toLowerCase().includes(term) ||
+            order.shippingAddress?.city?.toLowerCase().includes(term)
+        );
+    }, [orders, searchTerm]);
 
     const assignRider = useMutation({
         mutationFn: async ({ orderId, riderId }: { orderId: string; riderId: string }) => {
@@ -147,7 +158,7 @@ export default function RecentOrders({ orders, isLoading }: { orders?: any[], is
         return "bg-gray-50 text-gray-500 border border-gray-200";
     };
 
-    const currentOrders = orders || [];
+    const currentOrders = filteredOrders;
 
     return (
         <Card className="rounded-xl border border-gray-100 shadow-sm bg-white h-full flex flex-col">
@@ -165,9 +176,19 @@ export default function RecentOrders({ orders, isLoading }: { orders?: any[], is
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="Search"
-                            className="w-full h-10 pl-10 pr-4 rounded-xl border border-gray-100 bg-gray-50/50 text-[13px] font-medium outline-none focus:border-red-500/30 transition-all placeholder:text-gray-300"
+                            placeholder="Search orders..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full h-10 pl-10 pr-10 rounded-xl border border-gray-100 bg-gray-50/50 text-[13px] font-medium outline-none focus:border-red-500/30 transition-all placeholder:text-gray-300"
                         />
+                        {searchTerm && (
+                            <button
+                                onClick={() => setSearchTerm("")}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -196,7 +217,7 @@ export default function RecentOrders({ orders, isLoading }: { orders?: any[], is
                             ) : currentOrders.length === 0 ? (
                                 <tr>
                                     <td colSpan={5} className="px-5 py-10 text-center text-gray-400 text-sm italic">
-                                        No recent orders found
+                                        {searchTerm ? "No orders matching your search" : "No recent orders found"}
                                     </td>
                                 </tr>
                             ) : (
