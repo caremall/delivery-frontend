@@ -85,11 +85,10 @@ const statusFilters = [
   { label: "All", value: "" },
   { label: "Pending", value: "pending" },
   { label: "Processing", value: "processing" },
-  { label: "Confirmed", value: "confirmed" },
+  { label: "Picked", value: "picked" },
   { label: "Packed", value: "packed" },
   { label: "Dispatched", value: "dispatched" },
-  { label: "In Transit", value: "in_transit" },
-  { label: "Out for Delivery", value: "out_for_delivery" },
+  { label: "Shipped", value: "shipped" },
   { label: "Delivered", value: "delivered" },
   { label: "Cancelled", value: "cancelled" },
 ];
@@ -224,6 +223,8 @@ export default function AllOrdersPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
+  const [orderStatus, setOrderStatus] = useState("");
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
   const [assigningOrderId, setAssigningOrderId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -235,10 +236,13 @@ export default function AllOrdersPage() {
   }, [search]);
 
   const { data: ordersData, isLoading } = useQuery({
-    queryKey: ["deliveryHubOrders", debouncedSearch, page, limit],
+    queryKey: ["deliveryHubOrders", debouncedSearch, page, limit, orderStatus, dateRange],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (debouncedSearch) params.append("search", debouncedSearch);
+      if (orderStatus) params.append("status", orderStatus);
+      if (dateRange?.from) params.append("startDate", dateRange.from.toISOString());
+      if (dateRange?.to) params.append("endDate", dateRange.to.toISOString());
       params.append("page", String(page));
       params.append("limit", String(limit));
       const res = await axiosInstance.get(`/orders?${params.toString()}`);
@@ -286,12 +290,12 @@ export default function AllOrdersPage() {
       cell: ({ row }) => <span className="text-[#374151] font-semibold text-sm">{row.original.shippingAddress?.fullName || "-"}</span>,
     },
     {
-      accessorKey: "shippingAddress.address1",
+      accessorKey: "shippingAddress.addressLine1",
       header: "Address",
       enableSorting: false,
       cell: ({ row }) => (
-        <span className="text-[#6b7280] text-sm max-w-[200px] truncate block" title={`${row.original.shippingAddress?.address1}, ${row.original.shippingAddress?.city}`}>
-          {row.original.shippingAddress?.address1}, {row.original.shippingAddress?.city}
+        <span className="text-[#6b7280] text-sm max-w-[200px] truncate block" title={`${row.original.shippingAddress?.addressLine1}, ${row.original.shippingAddress?.city}`}>
+          {row.original.shippingAddress?.addressLine1}, {row.original.shippingAddress?.city}
         </span>
       ),
     },
@@ -343,9 +347,7 @@ export default function AllOrdersPage() {
               <Link href={`/orders/details?id=${row.original._id}`}>
                 <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">View Details</DropdownMenuItem>
               </Link>
-              <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">Call Customer</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm text-red-600 focus:bg-red-50">Mark as Problem</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -395,6 +397,11 @@ export default function AllOrdersPage() {
                 placeholder: "Filter by Date",
               },
             ]}
+            onFilterChange={(filters) => {
+              setOrderStatus(filters.selectFilters.orderStatus || "");
+              setDateRange(filters.dateFilters.createdAt || {});
+              setPage(1);
+            }}
           />
         </CardContent>
       </Card>

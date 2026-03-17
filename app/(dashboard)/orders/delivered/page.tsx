@@ -85,6 +85,7 @@ export default function DeliveredOrdersPage() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
+    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -95,10 +96,12 @@ export default function DeliveredOrdersPage() {
     }, [search]);
 
     const { data: ordersData, isLoading } = useQuery({
-        queryKey: ["deliveredOrders", debouncedSearch, page, limit],
+        queryKey: ["deliveredOrders", debouncedSearch, page, limit, dateRange],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (debouncedSearch) params.append("search", debouncedSearch);
+            if (dateRange?.from) params.append("startDate", dateRange.from.toISOString());
+            if (dateRange?.to) params.append("endDate", dateRange.to.toISOString());
             params.append("status", "delivered");
             params.append("page", String(page));
             params.append("limit", String(limit));
@@ -120,19 +123,22 @@ export default function DeliveredOrdersPage() {
         {
             accessorKey: "orderId",
             header: "Order ID",
+            enableSorting: false,
             cell: ({ row }) => <span className="font-medium text-[#111827] text-sm tracking-wide">{row.original.orderId}</span>,
         },
         {
             accessorKey: "shippingAddress.fullName",
             header: "Customer Name",
+            enableSorting: false,
             cell: ({ row }) => <span className="text-[#374151] font-semibold text-sm">{row.original.shippingAddress?.fullName || "-"}</span>,
         },
         {
-            accessorKey: "shippingAddress.address1",
+            accessorKey: "shippingAddress.addressLine1",
             header: "Address",
+            enableSorting: false,
             cell: ({ row }) => (
-                <span className="text-[#6b7280] text-sm max-w-[200px] truncate block" title={`${row.original.shippingAddress?.address1}, ${row.original.shippingAddress?.city}`}>
-                    {row.original.shippingAddress?.address1}, {row.original.shippingAddress?.city}
+                <span className="text-[#6b7280] text-sm max-w-[200px] truncate block" title={`${row.original.shippingAddress?.addressLine1}, ${row.original.shippingAddress?.city}`}>
+                    {row.original.shippingAddress?.addressLine1}, {row.original.shippingAddress?.city}
                 </span>
             ),
         },
@@ -148,6 +154,7 @@ export default function DeliveredOrdersPage() {
         {
             id: "rider",
             header: "Delivery Rider",
+            enableSorting: false,
             cell: ({ row }) => {
                 const assignedRider = getAssignedRider(row.original);
                 return (
@@ -179,10 +186,9 @@ export default function DeliveredOrdersPage() {
                         <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100 p-1">
                             <DropdownMenuLabel className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <Link href={`/orders/${row.original._id}`}>
+                            <Link href={`/orders/details?id=${row.original._id}`}>
                                 <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">View Details</DropdownMenuItem>
                             </Link>
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">Call Customer</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -225,6 +231,10 @@ export default function DeliveredOrdersPage() {
                                 placeholder: "Filter by Date",
                             },
                         ]}
+                        onFilterChange={(filters) => {
+                            setDateRange(filters.dateFilters.createdAt || {});
+                            setPage(1);
+                        }}
                     />
                 </CardContent>
             </Card>
