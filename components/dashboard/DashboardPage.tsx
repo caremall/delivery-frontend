@@ -78,10 +78,18 @@ const SummaryCard = ({
 export default function DashboardPage() {
   const { manager } = useAuthStore();
 
+  const [dateRange, setDateRange] = React.useState<{ from: Date; to: Date }>({
+    from: new Date(new Date().setDate(new Date().getDate() - 11)),
+    to: new Date(),
+  });
+
   const { data: statsData, isLoading } = useQuery({
-    queryKey: ["dashboard-stats"],
+    queryKey: ["dashboard-stats", dateRange],
     queryFn: async () => {
-      const res = await axiosInstance.get("/dashboard/stats");
+      const params = new URLSearchParams();
+      if (dateRange.from) params.append("startDate", dateRange.from.toISOString());
+      if (dateRange.to) params.append("endDate", dateRange.to.toISOString());
+      const res = await axiosInstance.get(`/dashboard/stats?${params.toString()}`);
       return res.data.data;
     },
   });
@@ -187,7 +195,12 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <PerformanceChart data={statsData?.chartData} isLoading={isLoading} />
+          <PerformanceChart 
+            data={statsData?.chartData} 
+            isLoading={isLoading} 
+            dateRange={dateRange}
+            setDateRange={setDateRange}
+          />
         </div>
         <div className="lg:col-span-1">
           <OrderManagementDonut stats={statsData} isLoading={isLoading} />

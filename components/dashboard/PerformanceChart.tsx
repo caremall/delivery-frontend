@@ -3,7 +3,10 @@
 import * as React from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChevronDown, Calendar } from "lucide-react"
+import { ChevronDown, Calendar as CalendarIcon } from "lucide-react"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Calendar } from "@/components/ui/calendar"
+import { format } from "date-fns"
 
 const chartData = [
     { name: "Feb 01", value: 60 },
@@ -20,7 +23,14 @@ const chartData = [
     { name: "Feb 12", value: 32 },
 ]
 
-export default function PerformanceChart({ data, isLoading }: { data?: any[], isLoading: boolean }) {
+interface PerformanceChartProps {
+    data?: any[]
+    isLoading: boolean
+    dateRange: { from: Date; to: Date }
+    setDateRange: (range: { from: Date; to: Date }) => void
+}
+
+export default function PerformanceChart({ data, isLoading, dateRange, setDateRange }: PerformanceChartProps) {
     const displayData = React.useMemo(() => data || chartData, [data]);
 
     return (
@@ -28,11 +38,36 @@ export default function PerformanceChart({ data, isLoading }: { data?: any[], is
             <CardContent className="p-6 flex flex-col h-full bg-white">
                 <div className="flex items-center justify-between mb-8">
                     <h3 className="text-sm font-medium text-gray-900">Revenue Volume</h3>
-                    <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-medium text-gray-400 hover:bg-gray-50 transition-colors">
-                        <Calendar className="h-3.5 w-3.5" />
-                        {displayData.length > 0 ? `${displayData[0].name} - ${displayData[displayData.length - 1].name}` : "Select range"}
-                        <ChevronDown className="h-4 w-4" />
-                    </button>
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-100 text-[11px] font-medium text-gray-400 hover:bg-gray-50 transition-colors cursor-pointer outline-none shadow-none">
+                                <CalendarIcon className="h-3.5 w-3.5" />
+                                {dateRange.from && dateRange.to ? (
+                                    <>
+                                        {format(dateRange.from, "MMM dd")} - {format(dateRange.to, "MMM dd")}
+                                    </>
+                                ) : (
+                                    "Select range"
+                                )}
+                                <ChevronDown className="h-4 w-4" />
+                            </button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="end">
+                            <Calendar
+                                initialFocus
+                                mode="range"
+                                selected={{ from: dateRange.from, to: dateRange.to }}
+                                onSelect={(rangeValue: any) => {
+                                    if (rangeValue?.from && rangeValue?.to) {
+                                        setDateRange(rangeValue as { from: Date; to: Date });
+                                    } else if (rangeValue?.from) {
+                                        setDateRange({ from: rangeValue.from, to: rangeValue.from });
+                                    }
+                                }}
+                                numberOfMonths={2}
+                            />
+                        </PopoverContent>
+                    </Popover>
                 </div>
 
                 <div className="h-[280px] w-full">
