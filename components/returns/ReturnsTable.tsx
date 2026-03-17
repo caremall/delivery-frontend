@@ -22,6 +22,14 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
+import { Filter } from "lucide-react";
 
 export default function ReturnsTable() {
     const [page, setPage] = useState(1);
@@ -254,20 +262,51 @@ export default function ReturnsTable() {
                         setPage(p.pageIndex + 1);
                     }}
                     customToolbarItem={
-                        <select
-                            value={status}
-                            onChange={(e) => {
-                                setStatus(e.target.value);
-                                setPage(1);
-                            }}
-                            className="h-10 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium outline-none focus:ring-2 focus:ring-red-500/20 cursor-pointer"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="requested">Requested</option>
-                            <option value="approved">Approved</option>
-                            <option value="completed">Completed</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                             <Select
+                                value={status}
+                                onValueChange={(val) => {
+                                    setStatus(val);
+                                    setPage(1);
+                                }}
+                            >
+                                <SelectTrigger className="w-[160px] h-10 rounded-xl border-gray-200 bg-white text-xs font-semibold shadow-none focus:ring-0">
+                                    <div className="flex items-center gap-2 text-gray-400">
+                                        <Filter className="h-3.5 w-3.5" />
+                                        <SelectValue placeholder="Status" />
+                                    </div>
+                                </SelectTrigger>
+                                <SelectContent className="rounded-xl border-gray-100 shadow-xl p-1">
+                                    <SelectItem value="all" className="rounded-lg text-xs font-medium cursor-pointer">
+                                        All Status
+                                    </SelectItem>
+                                    <SelectItem value="requested" className="rounded-lg text-xs font-medium cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-yellow-400" />
+                                            Requested
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="approved" className="rounded-lg text-xs font-medium cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                            Approved
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="completed" className="rounded-lg text-xs font-medium cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                                            Completed
+                                        </div>
+                                    </SelectItem>
+                                    <SelectItem value="rejected" className="rounded-lg text-xs font-medium cursor-pointer">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                            Rejected
+                                        </div>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     }
                 />
             </CardContent>
