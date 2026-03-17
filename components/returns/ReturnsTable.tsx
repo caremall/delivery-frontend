@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, UserIcon, Calendar, Truck, UserCircle, Bike } from "lucide-react";
+import { Search, Package, UserIcon, Calendar, Truck, UserCircle, Bike, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAssignedReturns, ReturnRequest } from "@/lib/api/returns";
@@ -14,6 +14,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function ReturnsTable() {
     const [page, setPage] = useState(1);
@@ -74,6 +82,7 @@ export default function ReturnsTable() {
         {
             accessorKey: "returnId",
             header: "Return ID",
+            enableSorting: false, 
             cell: ({ row }) => (
                 <Link href={`/returns/details?id=${row.original._id}`} className="group">
                     <div className="flex flex-col">
@@ -88,6 +97,7 @@ export default function ReturnsTable() {
         {
             accessorKey: "item",
             header: "Product",
+            enableSorting: false, 
             cell: ({ row }) => {
                 const rtn = row.original;
                 return (
@@ -114,6 +124,7 @@ export default function ReturnsTable() {
         {
             accessorKey: "user",
             header: "Customer",
+            enableSorting: false,  
             cell: ({ row }) => (
                 <div className="flex flex-col">
                     <span className="text-[13px] font-normal text-gray-800 flex items-center gap-1.5">
@@ -149,6 +160,7 @@ export default function ReturnsTable() {
         {
             accessorKey: "rider",
             header: "Rider",
+            enableSorting: false, 
             cell: ({ row }) => {
                 const r = row.original.rider as any;
                 if (!r) {
@@ -193,14 +205,23 @@ export default function ReturnsTable() {
         },
         {
             id: "actions",
-            header: "",
+            header: "Actions",
             cell: ({ row }) => (
                 <div className="flex justify-end pr-4">
-                    <Link href={`/returns/details?id=${row.original._id}`}>
-                        <Button variant="ghost" size="sm" className="text-[11px] font-medium text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg">
-                            View Details
-                        </Button>
-                    </Link>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <button className="h-10 w-10 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-900 hover:bg-white border border-transparent hover:border-gray-100 shadow-none hover:shadow-sm transition-all focus:outline-none cursor-pointer">
+                                <MoreHorizontal className="h-6 w-6" />
+                            </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100 p-1">
+                            <DropdownMenuLabel className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <Link href={`/returns/details?id=${row.original._id}`}>
+                                <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">View Details</DropdownMenuItem>
+                            </Link>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
             )
         }
