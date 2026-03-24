@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChevronLeft, Package, User, Building2, Calendar, CreditCard, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,16 +15,17 @@ import { cn } from "@/lib/utils";
 import { getReturnById, updateReturnItemStatus, assignRiderToReturn, updateReplacementDeliveryStatus } from "@/lib/api/returns";
 import axiosInstance from "@/lib/axios";
 
-export default function ReturnDetailsClient() {
-    const searchParams = useSearchParams();
-    const id = searchParams.get("id") || "";
+interface ReturnDetailsClientProps {
+    id: string;
+}
+
+export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
     const router = useRouter();
     const queryClient = useQueryClient();
 
     const { data: response, isLoading } = useQuery({
         queryKey: ["returnDetails", id],
         queryFn: () => getReturnById(id),
-        enabled: !!id,
     });
 
     const returnData = response?.data;
@@ -78,7 +79,7 @@ export default function ReturnDetailsClient() {
         );
     }
 
-    if (!returnData || !id) {
+    if (!returnData) {
         return (
             <div className="min-h-screen bg-gray-50 p-6 flex items-center justify-center">
                 <div className="text-center space-y-4">
@@ -91,6 +92,7 @@ export default function ReturnDetailsClient() {
 
     const isReplacement = returnData?.returnType === "replacement";
 
+    // Status color: requested, approved, rejected, completed
     const getStatusColor = (status: string) => {
         switch (status?.toLowerCase()) {
             case "requested": return "bg-yellow-100 text-yellow-800";
@@ -101,6 +103,7 @@ export default function ReturnDetailsClient() {
         }
     };
 
+    // Return item status color: pending, picked, dropped, sent, received, rejected_picked, rejected_dropped
     const getReturnItemStatusColor = (status: string) => {
         switch (status?.toLowerCase()) {
             case "pending": return "bg-gray-100 text-gray-800";
@@ -108,7 +111,70 @@ export default function ReturnDetailsClient() {
             case "dropped": return "bg-purple-100 text-purple-800";
             case "sent": return "bg-indigo-100 text-indigo-800";
             case "received": return "bg-green-100 text-green-800";
+            case "rejected_picked": return "bg-red-100 text-red-800";
+            case "rejected_dropped": return "bg-orange-100 text-orange-800";
+            case "rejected_sent": return "bg-red-100 text-red-800";
+            case "rejected_received": return "bg-orange-100 text-orange-800";
             default: return "bg-gray-100 text-gray-800";
+        }
+    };
+
+    // Refund status color: pending, refunded, not_applicable
+    const getRefundStatusColor = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case "pending": return "bg-orange-50 text-orange-700";
+            case "refunded": return "bg-green-50 text-green-700";
+            case "not_applicable": return "bg-gray-50 text-gray-600";
+            default: return "bg-orange-50 text-orange-700";
+        }
+    };
+
+    // Pickup status color: pending, item_picked, item_delivered, shipped, delivered
+    const getPickupStatusColor = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case "pending": return "bg-gray-100 text-gray-700";
+            case "item_picked": return "bg-blue-100 text-blue-700";
+            case "item_delivered": return "bg-green-100 text-green-700";
+            case "shipped": return "bg-indigo-100 text-indigo-700";
+            case "delivered": return "bg-emerald-100 text-emerald-700";
+            default: return "bg-gray-100 text-gray-700";
+        }
+    };
+
+    // Replacement delivery status color: pending, sent, received
+    const getReplacementDeliveryStatusColor = (status: string) => {
+        switch (status?.toLowerCase()) {
+            case "pending": return "bg-gray-100 text-gray-700";
+            case "sent": return "bg-indigo-100 text-indigo-700";
+            case "received": return "bg-green-100 text-green-700";
+            default: return "bg-gray-100 text-gray-700";
+        }
+    };
+
+    // Return type color
+    const getReturnTypeColor = (type: string) => {
+        return type === 'replacement' ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800";
+    };
+
+    // Reason color: damaged, wrong_item, not_needed, other
+    const getReasonColor = (reason: string) => {
+        switch (reason?.toLowerCase()) {
+            case "damaged": return "bg-red-50 text-red-700";
+            case "wrong_item": return "bg-orange-50 text-orange-700";
+            case "not_needed": return "bg-yellow-50 text-yellow-700";
+            case "other": return "bg-gray-50 text-gray-700";
+            default: return "bg-gray-50 text-gray-700";
+        }
+    };
+
+    // Refund method color: bank, upi, source, not_applicable
+    const getRefundMethodColor = (method: string) => {
+        switch (method?.toLowerCase()) {
+            case "bank": return "bg-blue-50 text-blue-700";
+            case "upi": return "bg-purple-50 text-purple-700";
+            case "source": return "bg-green-50 text-green-700";
+            case "not_applicable": return "bg-gray-50 text-gray-600";
+            default: return "bg-gray-50 text-gray-700";
         }
     };
 
@@ -121,6 +187,7 @@ export default function ReturnDetailsClient() {
     return (
         <div className="min-h-screen bg-gray-50 p-6">
             <div className="max-w-7xl mx-auto">
+                {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div className="flex items-center gap-4">
                         <Button
@@ -145,7 +212,7 @@ export default function ReturnDetailsClient() {
                                 <Badge className={cn("border-0", getStatusColor(returnData?.status))}>
                                     {returnData?.status}
                                 </Badge>
-                                <Badge className={cn("border-0", isReplacement ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800")}>
+                                <Badge className={cn("border-0", getReturnTypeColor(returnData?.returnType))}>
                                     {returnData?.returnType === 'return' ? "Refund" : returnData?.returnType}
                                 </Badge>
                             </div>
@@ -154,7 +221,91 @@ export default function ReturnDetailsClient() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column */}
                     <div className="lg:col-span-2 space-y-6">
+
+                        {/* All Statuses Overview Card */}
+                        <Card>
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-lg">All Status Overview</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div className="border rounded-lg p-3 space-y-1">
+                                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Return Status</span>
+                                        <div>
+                                            <Badge className={cn("border-0 capitalize", getStatusColor(returnData?.status))}>
+                                                {returnData?.status}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg p-3 space-y-1">
+                                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Return Item Status</span>
+                                        <div>
+                                            <Badge className={cn("border-0 capitalize", getReturnItemStatusColor(returnData?.returnItemStatus))}>
+                                                {returnData?.returnItemStatus?.replace(/_/g, " ") || "pending"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    {!isReplacement && (
+                                        <div className="border rounded-lg p-3 space-y-1">
+                                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Refund Status</span>
+                                            <div>
+                                                <Badge className={cn("border-0 capitalize", getRefundStatusColor(returnData?.refundStatus))}>
+                                                    {returnData?.refundStatus?.replace(/_/g, " ") || "pending"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="border rounded-lg p-3 space-y-1">
+                                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Pickup Status</span>
+                                        <div>
+                                            <Badge className={cn("border-0 capitalize", getPickupStatusColor(returnData?.pickupStatus))}>
+                                                {returnData?.pickupStatus?.replace(/_/g, " ") || "pending"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    <div className="border rounded-lg p-3 space-y-1">
+                                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Return Type</span>
+                                        <div>
+                                            <Badge className={cn("border-0 capitalize", getReturnTypeColor(returnData?.returnType))}>
+                                                {returnData?.returnType === 'return' ? "Refund" : returnData?.returnType}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    {isReplacement && (
+                                        <div className="border rounded-lg p-3 space-y-1">
+                                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Replacement Delivery</span>
+                                            <div>
+                                                <Badge className={cn("border-0 capitalize", getReplacementDeliveryStatusColor(returnData?.replacementDeliveryStatus))}>
+                                                    {returnData?.replacementDeliveryStatus || "pending"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="border rounded-lg p-3 space-y-1">
+                                        <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Reason</span>
+                                        <div>
+                                            <Badge className={cn("border-0 capitalize", getReasonColor(returnData?.reason))}>
+                                                {returnData?.reason?.replace(/_/g, " ")}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                    {!isReplacement && (
+                                        <div className="border rounded-lg p-3 space-y-1">
+                                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Refund Method</span>
+                                            <div>
+                                                <Badge className={cn("border-0 capitalize", getRefundMethodColor(returnData?.refundMethod))}>
+                                                    {returnData?.refundMethod?.replace(/_/g, " ") || "N/A"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Return Information */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg">Return Information</CardTitle>
@@ -203,6 +354,7 @@ export default function ReturnDetailsClient() {
                                     )}
                                 </div>
 
+                                {/* Images */}
                                 {returnData?.images && returnData.images.length > 0 && (
                                     <div>
                                         <span className="text-sm text-muted-foreground block mb-2">
@@ -223,6 +375,7 @@ export default function ReturnDetailsClient() {
                             </CardContent>
                         </Card>
 
+                        {/* Product Information */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg flex items-center gap-2">
@@ -257,11 +410,21 @@ export default function ReturnDetailsClient() {
                                                 <p className="font-medium">₹{returnData?.item?.priceAtOrder}</p>
                                             </div>
                                         </div>
+                                        {variant?.variantAttributes && (
+                                            <div className="flex flex-wrap gap-2 pt-2">
+                                                {variant.variantAttributes.map((attr: any, i: number) => (
+                                                    <span key={i} className="px-2 py-0.5 rounded-lg bg-gray-100 text-[10px] font-medium text-gray-600 capitalize">
+                                                        {attr.name}: {attr.value}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
+                        {/* Logistics Information */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg flex items-center gap-2">
@@ -275,7 +438,7 @@ export default function ReturnDetailsClient() {
                                         <span className="text-sm text-muted-foreground">Return Item Status</span>
                                         <div className="mt-1">
                                             <Badge className={cn("border-0 capitalize", getReturnItemStatusColor(returnData?.returnItemStatus))}>
-                                                {returnData?.returnItemStatus || "pending"}
+                                                {returnData?.returnItemStatus?.replace(/_/g, " ") || "pending"}
                                             </Badge>
                                         </div>
                                     </div>
@@ -292,6 +455,7 @@ export default function ReturnDetailsClient() {
                                     </div>
                                 </div>
 
+                                {/* Assigned Rider */}
                                 {returnData?.rider ? (
                                     <div className="pt-3 border-t">
                                         <span className="text-sm text-muted-foreground block mb-2">Assigned Rider</span>
@@ -318,16 +482,163 @@ export default function ReturnDetailsClient() {
                                         <p className="text-sm text-muted-foreground mt-1 italic">No rider assigned</p>
                                     </div>
                                 )}
+
+                                <div className="grid grid-cols-2 gap-4 pt-3 border-t">
+                                    {isReplacement && (
+                                        <div>
+                                            <span className="text-sm text-muted-foreground">Replacement Delivery Status</span>
+                                            <div className="mt-1">
+                                                <Badge className={cn("border-0 capitalize", getReplacementDeliveryStatusColor(returnData?.replacementDeliveryStatus))}>
+                                                    {returnData?.replacementDeliveryStatus || "pending"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <span className="text-sm text-muted-foreground">Pickup Status</span>
+                                        <div className="mt-1">
+                                            <Badge className={cn("border-0 capitalize", getPickupStatusColor(returnData?.pickupStatus))}>
+                                                {returnData?.pickupStatus?.replace(/_/g, " ") || "pending"}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Pickup Photos */}
+                                {returnData?.pickupPhotos && returnData.pickupPhotos.length > 0 && (
+                                    <div className="pt-3 border-t">
+                                        <span className="text-sm text-muted-foreground block mb-2">
+                                            Pickup Proof Photos
+                                        </span>
+                                        <div className="grid grid-cols-3 gap-2">
+                                            {returnData.pickupPhotos.map((photo: string, idx: number) => (
+                                                <img
+                                                    key={idx}
+                                                    src={photo}
+                                                    alt={`Pickup proof ${idx + 1}`}
+                                                    className="w-full h-32 object-cover rounded-lg border"
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {returnData?.deliveryHub?.address && (
+                                    <div className="pt-3 border-t">
+                                        <span className="text-sm text-muted-foreground block mb-1">Hub Address</span>
+                                        {typeof returnData.deliveryHub.address === 'object' ? (
+                                            <p className="text-sm">
+                                                {returnData.deliveryHub.address.street}, {returnData.deliveryHub.address.city}, {returnData.deliveryHub.address.state} - {returnData.deliveryHub.address.pinCode}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm">{returnData.deliveryHub.address}</p>
+                                        )}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
+
+                        {/* Refund Information (for return type) */}
+                        {!isReplacement && (
+                            <Card>
+                                <CardHeader className="pb-4">
+                                    <CardTitle className="text-lg flex items-center gap-2">
+                                        <CreditCard className="h-5 w-5" />
+                                        Refund Information
+                                    </CardTitle>
+                                </CardHeader>
+                                <CardContent className="space-y-3">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <span className="text-sm text-muted-foreground">Refund Status</span>
+                                            <div className="mt-1">
+                                                <Badge className={cn("border-0 capitalize", getRefundStatusColor(returnData?.refundStatus))}>
+                                                    {returnData?.refundStatus?.replace(/_/g, " ") || "pending"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm text-muted-foreground">Refund Amount</span>
+                                            <p className="font-bold text-lg">₹{returnData?.refundAmount || 0}</p>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <span className="text-sm text-muted-foreground">Refund Method</span>
+                                            <div className="mt-1">
+                                                <Badge className={cn("border-0 capitalize", getRefundMethodColor(returnData?.refundMethod))}>
+                                                    {returnData?.refundMethod?.replace(/_/g, " ") || "N/A"}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                        {returnData?.refundedAt && (
+                                            <div>
+                                                <span className="text-sm text-muted-foreground">Refunded At</span>
+                                                <p className="font-medium">
+                                                    {new Date(returnData.refundedAt).toLocaleString()}
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Bank Details */}
+                                    {returnData?.refundMethod === 'bank' && returnData?.bankDetails && (
+                                        <div className="pt-3 border-t">
+                                            <span className="text-sm text-muted-foreground block mb-2">Bank Details</span>
+                                            <div className="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-lg">
+                                                <div>
+                                                    <span className="text-xs text-muted-foreground">Account Holder</span>
+                                                    <p className="text-sm font-medium">{returnData.bankDetails.accountHolderName}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-xs text-muted-foreground">Account Number</span>
+                                                    <p className="text-sm font-medium font-mono">{returnData.bankDetails.accountNumber}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-xs text-muted-foreground">Bank Name</span>
+                                                    <p className="text-sm font-medium">{returnData.bankDetails.bankName}</p>
+                                                </div>
+                                                <div>
+                                                    <span className="text-xs text-muted-foreground">IFSC Code</span>
+                                                    <p className="text-sm font-medium font-mono">{returnData.bankDetails.ifscCode}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* UPI Details */}
+                                    {returnData?.refundMethod === 'upi' && (
+                                        <div className="pt-3 border-t">
+                                            <span className="text-sm text-muted-foreground block mb-2">UPI Details</span>
+                                            <div className="grid grid-cols-2 gap-3 bg-gray-50 p-3 rounded-lg">
+                                                {returnData?.upiId && (
+                                                    <div>
+                                                        <span className="text-xs text-muted-foreground">UPI ID</span>
+                                                        <p className="text-sm font-medium font-mono">{returnData.upiId}</p>
+                                                    </div>
+                                                )}
+                                                {returnData?.upiMobileNumber && (
+                                                    <div>
+                                                        <span className="text-xs text-muted-foreground">UPI Mobile</span>
+                                                        <p className="text-sm font-medium">{returnData.upiMobileNumber}</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
 
+                    {/* Right Column - Actions */}
                     <div className="space-y-6">
                         <Card className="border-primary/20 bg-primary/5">
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg">Update Status</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
+                                {/* Update Return Item Status */}
                                 <div className="space-y-2">
                                     <Label>Return Item Status</Label>
                                     <Select
@@ -344,10 +655,15 @@ export default function ReturnDetailsClient() {
                                             <SelectItem value="dropped">Dropped</SelectItem>
                                             <SelectItem value="sent">Sent</SelectItem>
                                             <SelectItem value="received">Received</SelectItem>
+                                            <SelectItem value="rejected_picked">Rejected Picked</SelectItem>
+                                            <SelectItem value="rejected_dropped">Rejected Dropped</SelectItem>
+                                            <SelectItem value="rejected_sent">Rejected Sent</SelectItem>
+                                            <SelectItem value="rejected_received">Rejected Received</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
 
+                                {/* Assign Rider */}
                                 <div className="space-y-2 pt-3 border-t border-gray-100">
                                     <Label>Assign Delivery Rider</Label>
                                     <Select
@@ -367,9 +683,31 @@ export default function ReturnDetailsClient() {
                                         </SelectContent>
                                     </Select>
                                 </div>
+
+                                {/* Replacement Delivery Status */}
+                                {isReplacement && (
+                                    <div className="space-y-2 pt-3 border-t border-gray-100">
+                                        <Label>Replacement Delivery Status</Label>
+                                        <Select
+                                            value={returnData.replacementDeliveryStatus || "pending"}
+                                            onValueChange={(val) => updateReplacementStatusMutation.mutate({ status: val })}
+                                            disabled={updateReplacementStatusMutation.isPending}
+                                        >
+                                            <SelectTrigger className="bg-white border-gray-200">
+                                                <SelectValue placeholder="Select Status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="sent">Sent</SelectItem>
+                                                <SelectItem value="received">Received</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
+                        {/* Order info */}
                         <Card>
                             <CardHeader className="pb-4">
                                 <CardTitle className="text-lg">Order Information</CardTitle>
@@ -378,6 +716,40 @@ export default function ReturnDetailsClient() {
                                 <div>
                                     <span className="text-sm text-muted-foreground">Order ID</span>
                                     <p className="font-medium font-mono">{returnData?.order?.orderId}</p>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-muted-foreground">Order Status</span>
+                                    <p className="font-medium capitalize">{returnData?.order?.orderStatus}</p>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-muted-foreground">Order Date</span>
+                                    <p className="font-medium">
+                                        {returnData?.order?.createdAt ? new Date(returnData.order.createdAt).toLocaleDateString() : "N/A"}
+                                    </p>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Customer Information */}
+                        <Card>
+                            <CardHeader className="pb-4">
+                                <CardTitle className="text-lg flex items-center gap-2">
+                                    <User className="h-5 w-5" />
+                                    Customer Details
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <div>
+                                    <span className="text-sm text-muted-foreground">Customer Name</span>
+                                    <p className="font-medium">{returnData?.user?.name}</p>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-muted-foreground">Phone</span>
+                                    <p className="font-medium">{returnData?.user?.phone}</p>
+                                </div>
+                                <div>
+                                    <span className="text-sm text-muted-foreground">Email</span>
+                                    <p className="font-medium truncate">{returnData?.user?.email}</p>
                                 </div>
                             </CardContent>
                         </Card>
