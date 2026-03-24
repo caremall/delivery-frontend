@@ -47,6 +47,7 @@ export const RiderDetailView = ({ riderId, isOpen, onClose }: RiderDetailViewPro
         {
             accessorKey: "orderId",
             header: "Order ID",
+            enableSorting: false, 
             cell: ({ row }) => <span className="font-bold text-gray-900">#{row.original.orderId}</span>,
         },
         {
@@ -137,7 +138,7 @@ export const RiderDetailView = ({ riderId, isOpen, onClose }: RiderDetailViewPro
                                 { label: "Completed", val: perf.deliveredCount, icon: CheckCircle2, color: "text-green-600", bg: "bg-green-50" },
                                 { label: "In Progress", val: perf.pendingCount, icon: Clock, color: "text-blue-600", bg: "bg-blue-50" },
                                 { label: "Completion", val: `${perf.completionRate}%`, icon: Bike, color: "text-purple-600", bg: "bg-purple-50" },
-                                { label: "Total Load", val: perf.totalOrders, icon: ShoppingBag, color: "text-orange-600", bg: "bg-orange-50" },
+                                { label: "Total Load ", val: perf.totalOrders, icon: ShoppingBag, color: "text-orange-600", bg: "bg-orange-50" },
                             ].map((s) => (
                                 <div key={s.label} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
                                     <div className="flex items-center gap-2 mb-2">

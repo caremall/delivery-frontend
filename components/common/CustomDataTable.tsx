@@ -63,6 +63,8 @@ interface CustomDataTableProps<TData, TValue> {
   onSearch?: (term: string) => void // Callback for server-side search
   hideRowSelectionInfo?: boolean // Prop to hide "X of Y rows selected"
   isLoading?: boolean
+  customToolbarItem?: React.ReactNode // Rendered to the left of the Columns button
+  onFilterChange?: (filters: { selectFilters: Record<string, string>; dateFilters: Record<string, { from?: Date; to?: Date }> }) => void
 }
 
 
@@ -143,6 +145,8 @@ export function CustomDataTable<TData, TValue>({
   onSearch,
   hideRowSelectionInfo = true,
   isLoading = false,
+  customToolbarItem,
+  onFilterChange,
 }: CustomDataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -161,6 +165,15 @@ export function CustomDataTable<TData, TValue>({
   const [globalFilter, setGlobalFilter] = React.useState("")
   const [dateFilters, setDateFilters] = React.useState<Record<string, { from?: Date; to?: Date }>>({})
   const [selectFilters, setSelectFilters] = React.useState<Record<string, string>>({})
+
+  const onFilterChangeRef = React.useRef(onFilterChange)
+  React.useEffect(() => {
+    onFilterChangeRef.current = onFilterChange
+  }, [onFilterChange])
+
+  React.useEffect(() => {
+    onFilterChangeRef.current?.({ selectFilters, dateFilters })
+  }, [selectFilters, dateFilters])
 
   // Handle pagination changes
   const handlePaginationChange = React.useCallback(
@@ -292,24 +305,34 @@ export function CustomDataTable<TData, TValue>({
 
   // Optimized filter handlers
   const handleSelectFilterChange = React.useCallback((columnId: string, value: string) => {
+    let nextState: Record<string, string> = {}
     setSelectFilters(prev => {
+      const newState = { ...prev }
       if (value === "__all__") {
-        const newState = { ...prev }
         delete newState[columnId]
-        return newState
+      } else {
+        newState[columnId] = value
       }
-      return { ...prev, [columnId]: value }
+      nextState = newState
+      return newState
     })
+    // Notify parent outside of render/updater phase
+    onFilterChange?.({ selectFilters: nextState, dateFilters })
     table.setPageIndex(0) // Reset to first page when filter changes
-  }, [table])
+  }, [table, onFilterChange, dateFilters])
 
   const handleDateFilterChange = React.useCallback((columnId: string, range: { from?: Date; to?: Date } | undefined) => {
-    setDateFilters(prev => ({
-      ...prev,
-      [columnId]: range || {}
-    }))
+    const newRange = range || {}
+    let nextState: Record<string, { from?: Date; to?: Date }> = {}
+    setDateFilters(prev => {
+      const newState = { ...prev, [columnId]: newRange }
+      nextState = newState
+      return newState
+    })
+    // Notify parent outside of render/updater phase
+    onFilterChange?.({ selectFilters, dateFilters: nextState })
     table.setPageIndex(0)
-  }, [table])
+  }, [table, onFilterChange, selectFilters])
 
   const handleGlobalFilterChange = React.useCallback((value: string) => {
     setGlobalFilter(value)
@@ -324,8 +347,10 @@ export function CustomDataTable<TData, TValue>({
     setSelectFilters({})
     setDateFilters({})
     setGlobalFilter("")
+    onSearch?.("")
+    onFilterChange?.({ selectFilters: {}, dateFilters: {} })
     table.setPageIndex(0)
-  }, [table])
+  }, [table, onFilterChange, onSearch])
 
   const hasActiveFilters = Object.keys(selectFilters).length > 0 ||
     Object.values(dateFilters).some(range => range.from || range.to) ||
@@ -369,6 +394,8 @@ export function CustomDataTable<TData, TValue>({
         )}
 
         <div className="ml-auto flex gap-2 items-center">
+          {customToolbarItem}
+          
           {/* Columns Visibility */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

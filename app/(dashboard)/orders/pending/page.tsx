@@ -215,6 +215,7 @@ export default function PendingOrdersPage() {
     const [debouncedSearch, setDebouncedSearch] = useState("");
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(10);
+    const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
     const [assigningOrderId, setAssigningOrderId] = useState<string | null>(null);
 
     useEffect(() => {
@@ -226,10 +227,12 @@ export default function PendingOrdersPage() {
     }, [search]);
 
     const { data: ordersData, isLoading } = useQuery({
-        queryKey: ["pendingOrders", debouncedSearch, page, limit],
+        queryKey: ["pendingOrders", debouncedSearch, page, limit, dateRange],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (debouncedSearch) params.append("search", debouncedSearch);
+            if (dateRange?.from) params.append("startDate", dateRange.from.toISOString());
+            if (dateRange?.to) params.append("endDate", dateRange.to.toISOString());
             params.append("status", "pending");
             params.append("page", String(page));
             params.append("limit", String(limit));
@@ -268,19 +271,22 @@ export default function PendingOrdersPage() {
         {
             accessorKey: "orderId",
             header: "Order ID",
+            enableSorting: false,
             cell: ({ row }) => <span className="font-medium text-[#111827] text-sm tracking-wide">{row.original.orderId}</span>,
         },
         {
             accessorKey: "shippingAddress.fullName",
             header: "Customer Name",
+            enableSorting: false,
             cell: ({ row }) => <span className="text-[#374151] font-semibold text-sm">{row.original.shippingAddress?.fullName || "-"}</span>,
         },
         {
-            accessorKey: "shippingAddress.address1",
+            accessorKey: "shippingAddress.addressLine1",
             header: "Address",
+            enableSorting: false,
             cell: ({ row }) => (
-                <span className="text-[#6b7280] text-sm max-w-[200px] truncate block" title={`${row.original.shippingAddress?.address1}, ${row.original.shippingAddress?.city}`}>
-                    {row.original.shippingAddress?.address1}, {row.original.shippingAddress?.city}
+                <span className="text-[#6b7280] text-sm max-w-[200px] truncate block" title={`${row.original.shippingAddress?.addressLine1}, ${row.original.shippingAddress?.city}`}>
+                    {row.original.shippingAddress?.addressLine1}, {row.original.shippingAddress?.city}
                 </span>
             ),
         },
@@ -296,6 +302,7 @@ export default function PendingOrdersPage() {
         {
             id: "rider",
             header: "Delivery Rider",
+            enableSorting: false, 
             cell: ({ row }) => {
                 const assignedRider = getAssignedRider(row.original);
                 return (
@@ -328,12 +335,10 @@ export default function PendingOrdersPage() {
                         <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-xl border-gray-100 p-1">
                             <DropdownMenuLabel className="px-3 py-2 text-xs font-medium text-gray-500 uppercase">Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <Link href={`/orders/${row.original._id}`}>
+                            <Link href={`/orders/details?id=${row.original._id}`}>
                                 <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">View Details</DropdownMenuItem>
                             </Link>
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm">Call Customer</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="cursor-pointer rounded-lg px-3 py-2 text-sm text-red-600 focus:bg-red-50">Mark as Problem</DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
@@ -369,19 +374,23 @@ export default function PendingOrdersPage() {
                         pagination={{ pageIndex: page - 1, pageSize: limit }}
                         onPaginationChange={(p) => { setPage(p.pageIndex + 1); setLimit(p.pageSize); }}
                         onSearch={(term) => setSearch(term)}
-                        filters={[
-                            {
-                                type: "select",
-                                column: "orderStatus",
-                                placeholder: "Filter by Status",
-                                options: statusFilters.map(f => ({ value: f.value, label: f.label })),
-                            },
-                            {
-                                type: "date",
-                                column: "createdAt",
-                                placeholder: "Filter by Date",
-                            },
-                        ]}
+                        // filters={[
+                        //     {
+                        //         type: "select",
+                        //         column: "orderStatus",
+                        //         placeholder: "Filter by Status",
+                        //         options: statusFilters.map(f => ({ value: f.value, label: f.label })),
+                        //     },
+                        //     {
+                        //         type: "date",
+                        //         column: "createdAt",
+                        //         placeholder: "Filter by Date",
+                        //     },
+                        // ]}
+                        onFilterChange={(filters) => {
+                            setDateRange(filters.dateFilters.createdAt || {});
+                            setPage(1);
+                        }}
                     />
                 </CardContent>
             </Card>
