@@ -1,53 +1,26 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, Package, UserIcon, Calendar, Truck, UserCircle, Bike } from "lucide-react";
+import { Package, UserIcon, Calendar, CheckCircle2, XCircle, UserCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { getAssignedReturns, ReturnRequest } from "@/lib/api/returns";
 import { CustomDataTable } from "@/components/common/CustomDataTable";
 import { ColumnDef } from "@tanstack/react-table";
-import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 
-export default function ReturnsTable() {
+export default function ProcessedReturnsTable() {
     const [page, setPage] = useState(1);
-    const [status, setStatus] = useState("all");
-    const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
-    const [selectedReturnDoc, setSelectedReturnDoc] = useState<ReturnRequest | null>(null);
-
-    const queryClient = useQueryClient();
+    const [activeTab, setActiveTab] = useState<"completed" | "rejected">("completed");
 
     const { data: returnsData, isLoading } = useQuery({
-        queryKey: ["assignedReturns", page, status],
-        queryFn: () => getAssignedReturns({ page, status }),
+        queryKey: ["assignedReturns", page, activeTab],
+        queryFn: () => getAssignedReturns({ page, status: activeTab }),
         refetchInterval: 30000,
-    });
-
-    const { data: ridersData } = useQuery({
-        queryKey: ["activeRiders"],
-        queryFn: async () => {
-            const res = await axiosInstance.get("/riders/list/active?limit=50");
-            return res.data.data.riders;
-        },
-        enabled: isAssignModalOpen,
-    });
-
-    const assignMutation = useMutation({
-        mutationFn: async ({ returnId, riderId }: { returnId: string, riderId: string }) => {
-            const res = await axiosInstance.put(`/warehouse/returns/${returnId}/assign-rider`, { riderId });
-            return res.data;
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["assignedReturns"] });
-            setIsAssignModalOpen(false);
-            setSelectedReturnDoc(null);
-        }
     });
 
     const returns: ReturnRequest[] = returnsData?.data || [];
@@ -126,7 +99,7 @@ export default function ReturnsTable() {
         },
         {
             accessorKey: "updatedAt",
-            header: "Requested At",
+            header: "Processed At",
             cell: ({ row }) => (
                 <div className="flex flex-col">
                     <span className="text-[12px] font-normal text-gray-600 flex items-center gap-1.5">
@@ -152,19 +125,7 @@ export default function ReturnsTable() {
             cell: ({ row }) => {
                 const r = row.original.rider as any;
                 if (!r) {
-                    return (
-                        <Button
-                            variant={"outline"}
-                            size="sm"
-                            className="text-[10px] h-7 px-2"
-                            onClick={() => {
-                                setSelectedReturnDoc(row.original);
-                                setIsAssignModalOpen(true);
-                            }}
-                        >
-                            <Bike className="w-3 h-3 mr-1" /> Assign Rider
-                        </Button>
-                    );
+                    return <span className="text-[11px] text-gray-400">Not assigned</span>;
                 }
                 return (
                     <div className="flex items-center gap-2">
@@ -208,30 +169,32 @@ export default function ReturnsTable() {
 
     return (
         <Card className="rounded-2xl border-none shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] bg-white overflow-hidden">
-            <CardHeader className="p-6 pb-2 border-b border-gray-50">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
-                    <CardTitle className="text-xl font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                        <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center">
-                            <Truck className="h-5 w-5 text-red-500" />
-                        </div>
-                        Assigned Return Requests
-                    </CardTitle>
-                    <div className="flex items-center gap-2">
-                        <select
-                            value={status}
-                            onChange={(e) => {
-                                setStatus(e.target.value);
-                                setPage(1);
-                            }}
-                            className="h-10 px-4 rounded-xl border border-gray-200 bg-white text-sm font-medium outline-none focus:ring-2 focus:ring-red-500/20"
-                        >
-                            <option value="all">All Status</option>
-                            <option value="requested">Requested</option>
-                            <option value="approved">Approved</option>
-                            <option value="completed">Completed</option>
-                            <option value="rejected">Rejected</option>
-                        </select>
-                    </div>
+            <CardHeader className="p-0 border-b border-gray-100">
+                <div className="flex items-center">
+                    <button
+                        onClick={() => { setActiveTab("completed"); setPage(1); }}
+                        className={cn(
+                            "flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors border-b-2",
+                            activeTab === "completed"
+                                ? "border-green-500 text-green-600 bg-green-50/30"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                        )}
+                    >
+                        <CheckCircle2 className="w-4 h-4" />
+                        Accepted Returns
+                    </button>
+                    <button
+                        onClick={() => { setActiveTab("rejected"); setPage(1); }}
+                        className={cn(
+                            "flex-1 flex items-center justify-center gap-2 py-4 text-sm font-medium transition-colors border-b-2",
+                            activeTab === "rejected"
+                                ? "border-red-500 text-red-600 bg-red-50/30"
+                                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                        )}
+                    >
+                        <XCircle className="w-4 h-4" />
+                        Rejected Returns
+                    </button>
                 </div>
             </CardHeader>
             <CardContent className="p-0">
@@ -250,48 +213,6 @@ export default function ReturnsTable() {
                     }}
                 />
             </CardContent>
-
-            {/* Rider Assignment Modal */}
-            <Dialog open={isAssignModalOpen} onOpenChange={setIsAssignModalOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Assign Rider for Return Pickup</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4 font-mono text-sm text-gray-500 mb-2 border-b">
-                        Return ID: <span className="font-bold text-indigo-600">{selectedReturnDoc?.returnId}</span>
-                    </div>
-                    {ridersData?.length === 0 ? (
-                        <div className="text-center text-sm text-gray-500 py-6">
-                            No active riders available.
-                        </div>
-                    ) : (
-                        <div className="flex flex-col gap-2 max-h-[300px] overflow-y-auto pr-2">
-                            {ridersData?.map((rider: any) => (
-                                <div key={rider._id} className="flex items-center justify-between p-3 border rounded-lg hover:border-red-200 hover:bg-red-50 cursor-pointer transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <Avatar>
-                                            <AvatarImage src={rider.avatar} />
-                                            <AvatarFallback>{rider.name?.charAt(0)}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex flex-col">
-                                            <span className="font-bold text-sm">{rider.name}</span>
-                                            <span className="text-xs text-gray-500">{rider.phone}</span>
-                                        </div>
-                                    </div>
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        disabled={assignMutation.isPending}
-                                        onClick={() => assignMutation.mutate({ returnId: selectedReturnDoc?._id!, riderId: rider._id })}
-                                    >
-                                        {assignMutation.isPending ? "Assigning..." : "Assign"}
-                                    </Button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </DialogContent>
-            </Dialog>
         </Card>
     );
 }
