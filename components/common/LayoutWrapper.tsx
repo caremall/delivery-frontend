@@ -66,6 +66,8 @@ const findCurrentPage = (
   return null;
 };
 
+const NO_LAYOUT_ROUTES = ["/", "/login"];
+
 export function LayoutWrapper({ children }: LayoutWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -82,10 +84,17 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     return () => unsub();
   }, []);
 
-  const noLayoutRoutes = ["/", "/login"];
+  // Handle redirect in useEffect to avoid rendering updates
+  useEffect(() => {
+    if (hydrated && !NO_LAYOUT_ROUTES.includes(pathname)) {
+      if (!token || !manager) {
+        router.replace("/login");
+      }
+    }
+  }, [hydrated, pathname, token, manager, router]);
 
   // No layout for auth pages
-  if (noLayoutRoutes.includes(pathname)) {
+  if (NO_LAYOUT_ROUTES.includes(pathname)) {
     return <>{children}</>;
   }
 
@@ -94,9 +103,8 @@ export function LayoutWrapper({ children }: LayoutWrapperProps) {
     return null;
   }
 
-  // Hydrated but not authenticated → redirect
+  // Hydrated but not authenticated → redirecting
   if (!token || !manager) {
-    router.replace("/login");
     return null;
   }
 
