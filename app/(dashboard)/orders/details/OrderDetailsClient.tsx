@@ -2,7 +2,7 @@
 
 import React from "react";
 import { useSearchParams } from "next/navigation";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -21,6 +21,7 @@ const statusColors = {
   dispatched: { bg: "bg-[#fef9c3]", border: "border-[#fde047]", text: "text-[#854d0e]" },
   shipped: { bg: "bg-[#fef9c3]", border: "border-[#fde047]", text: "text-[#854d0e]" },
   cancelled: { bg: "bg-[#fef2f2]", border: "border-[#fecaca]", text: "text-[#dc2626]" },
+  undelivered: { bg: "bg-[#fef2f2]", border: "border-[#fecaca]", text: "text-[#dc2626]" },
 } as const;
 
 function StatusBadge({ status }: { status: string }) {
@@ -32,6 +33,7 @@ function StatusBadge({ status }: { status: string }) {
   if (s === "pending" || s === "processing" || s === "confirmed") displayStatus = "Pending";
   if (s === "assigned" || s === "dispatched") displayStatus = "Dispatched";
   if (s === "shipped") displayStatus = "Shipped";
+  if (s === "undelivered") displayStatus = "Undelivered";
 
   return (
     <span className={cn("inline-flex items-center px-3 py-1 rounded-md border text-xs font-medium", config.bg, config.border, config.text)}>
@@ -43,6 +45,17 @@ function StatusBadge({ status }: { status: string }) {
 export default function OrderDetailsClient() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+  const queryClient = useQueryClient();
+
+  const returnToWarehouseMutation = useMutation({
+    mutationFn: async () => {
+      const res = await axiosInstance.patch(`/orders/${id}/return-to-warehouse`);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["order", id] });
+    },
+  });
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ["order", id],
@@ -89,6 +102,72 @@ export default function OrderDetailsClient() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {order.orderStatus === "undelivered" && (
+          <Card className="col-span-1 md:col-span-2 lg:col-span-2 border-red-200 bg-red-50/30 animate-in fade-in duration-300">
+            <CardHeader>
+              <CardTitle className="text-red-700 flex items-center gap-2">
+                <Package className="h-5 w-5 text-red-600 animate-pulse" />
+                Undelivered Order Processing
+              </CardTitle>
+              <CardDescription className="text-red-600/80">
+                This order was marked as undelivered by the rider.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {order.undeliveredNote && (
+                <div className="bg-red-100/40 border border-red-200/50 p-4 rounded-xl text-red-950">
+                  <span className="text-xs font-black uppercase tracking-wider text-red-700 block mb-1">Rider's Note / Reason:</span>
+                  <p className="text-sm font-semibold italic">"{order.undeliveredNote}"</p>
+                </div>
+              )}
+              {order.undeliveredPlace === "deliveryhub" ? (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-lg border border-red-100 shadow-sm">
+                  <div>
+                    <h4 className="font-semibold text-gray-900">Received at Delivery Hub</h4>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      The rider dropped off the undelivered package at this hub. Please confirm when it has been returned to the main warehouse.
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => returnToWarehouseMutation.mutate()}
+                    disabled={returnToWarehouseMutation.isPending}
+                    className="bg-red-600 hover:bg-red-700 text-white shrink-0 font-semibold"
+                  >
+                    {returnToWarehouseMutation.isPending ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      "Mark as Returned to Warehouse"
+                    )}
+                  </Button>
+                </div>
+              ) : order.undeliveredPlace === "warehouse" && order.undeliveredWarehouseDrop ? (
+                <div className="flex items-center gap-3 bg-green-50 p-4 rounded-lg border border-green-200 text-green-800">
+                  <span className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold shrink-0">✓</span>
+                  <div>
+                    <h4 className="font-semibold">Returned to Warehouse</h4>
+                    <p className="text-sm text-green-700 mt-0.5">
+                      This order has been successfully returned to the main warehouse.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-3 bg-amber-50 p-4 rounded-lg border border-amber-200 text-amber-800">
+                  <Loader2 className="h-5 w-5 animate-spin text-amber-600 shrink-0" />
+                  <div>
+                    <h4 className="font-semibold">Pending Rider Drop-off</h4>
+                    <p className="text-sm text-amber-700 mt-0.5">
+                      The rider has marked this order as undelivered and is currently returning it to the delivery hub.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Order Status Card */}
         <Card className="col-span-1 md:col-span-2 lg:col-span-2">
           <CardHeader>

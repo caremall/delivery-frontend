@@ -79,6 +79,11 @@ const statusColors = {
     border: "border-[#fecaca]",
     text: "text-[#dc2626]",
   },
+  undelivered: {
+    bg: "bg-[#fef2f2]",
+    border: "border-[#fecaca]",
+    text: "text-[#dc2626]",
+  },
 } as const;
 
 const statusFilters = [
@@ -91,6 +96,7 @@ const statusFilters = [
   { label: "Shipped", value: "shipped" },
   { label: "Delivered", value: "delivered" },
   { label: "Cancelled", value: "cancelled" },
+  { label: "Undelivered", value: "undelivered" },
 ];
 
 function StatusBadge({ status }: { status: string }) {
@@ -108,6 +114,7 @@ function StatusBadge({ status }: { status: string }) {
   if (s === "pending" || s === "processing" || s === "confirmed") displayStatus = "Pending";
   if (s === "assigned" || s === "dispatched") displayStatus = "Dispatched";
   if (s === "shipped") displayStatus = "Shipped";
+  if (s === "undelivered") displayStatus = "Undelivered";
 
   return (
     <span
