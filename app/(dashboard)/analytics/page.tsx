@@ -109,7 +109,7 @@ export default function AnalyticsPage() {
                 />
                 <StatCard
                     title="Active Riders"
-                    value={stats?.totalRiders || 0}
+                    value={`${stats?.activeRiders || 0}/${stats?.totalRiders || 0}`}
                     icon={Users}
                     iconBg="bg-amber-50"
                     iconColor="text-amber-500"
