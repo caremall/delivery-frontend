@@ -91,6 +91,71 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
     }
 
     const isReplacement = returnData?.returnType === "replacement";
+    const returnStatus = returnData?.status?.toLowerCase();
+    const returnItemStatus = returnData?.returnItemStatus?.toLowerCase();
+    const replacementDeliveryStatus = returnData?.replacementDeliveryStatus?.toLowerCase();
+    const pickupStatus = returnData?.pickupStatus?.toLowerCase();
+    const isApprovedReplacementSent = isReplacement && returnStatus === "approved" && replacementDeliveryStatus === "sent";
+    const isRefundRiderDropped = !isReplacement && (
+        returnItemStatus === "dropped" ||
+        pickupStatus === "dropped" ||
+        pickupStatus === "item_delivered"
+    );
+    const isRefundAccepted = !isReplacement && ["approved", "completed"].includes(returnStatus || "");
+    const isRejectedItemStatusFinal = [
+        "rejected_received",
+        "rejected_picked",
+        "rejected_dropped",
+    ].includes(returnItemStatus || "");
+    const returnItemStatusOptions = [
+        { value: "pending", label: "Pending" },
+        { value: "picked", label: "Picked" },
+        { value: "dropped", label: "Dropped" },
+        { value: "sent", label: "Sent" },
+        { value: "received", label: "Received" },
+        { value: "rejected_picked", label: "Rejected Picked" },
+        { value: "rejected_dropped", label: "Rejected Dropped" },
+        { value: "rejected_sent", label: "Rejected Sent" },
+        { value: "rejected_received", label: "Rejected Received" },
+    ];
+    const getAllowedReturnItemStatuses = () => {
+        if (isRejectedItemStatusFinal) {
+            return ["pending"];
+        }
+
+        if (isReplacement) {
+            if (isApprovedReplacementSent) {
+                return ["pending"];
+            }
+
+            if (returnItemStatus === "rejected_sent") {
+                return ["pending", "rejected_received"];
+            }
+
+            return returnStatus === "rejected"
+                ? ["pending", "received"]
+                : ["pending", "sent"];
+        }
+
+        if (returnStatus === "rejected") {
+            return ["pending", "rejected_received"];
+        }
+
+        if (isRefundRiderDropped) {
+            return ["pending", "sent"];
+        }
+
+        return ["pending", "received"];
+    };
+    const allowedReturnItemStatuses = getAllowedReturnItemStatuses();
+    const replacementDeliveryStatusOptions = [
+        { value: "pending", label: "Pending" },
+        { value: "sent", label: "Sent" },
+        { value: "received", label: "Received" },
+    ];
+    const allowedReplacementDeliveryStatuses = isApprovedReplacementSent || returnStatus === "rejected"
+        ? ["pending", "received"]
+        : ["pending", "sent"];
 
     // Status color: requested, approved, rejected, completed
     const getStatusColor = (status: string) => {
@@ -644,21 +709,21 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                     <Select
                                         value={returnData.returnItemStatus || "pending"}
                                         onValueChange={(val) => updateItemStatusMutation.mutate({ status: val })}
-                                        disabled={updateItemStatusMutation.isPending}
+                                        disabled={updateItemStatusMutation.isPending || (isRefundAccepted && !isRefundRiderDropped)}
                                     >
                                         <SelectTrigger className="bg-white border-gray-200">
                                             <SelectValue placeholder="Select Status" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="pending">Pending</SelectItem>
-                                            <SelectItem value="picked">Picked</SelectItem>
-                                            <SelectItem value="dropped">Dropped</SelectItem>
-                                            <SelectItem value="sent">Sent</SelectItem>
-                                            <SelectItem value="received">Received</SelectItem>
-                                            <SelectItem value="rejected_picked">Rejected Picked</SelectItem>
-                                            <SelectItem value="rejected_dropped">Rejected Dropped</SelectItem>
-                                            <SelectItem value="rejected_sent">Rejected Sent</SelectItem>
-                                            <SelectItem value="rejected_received">Rejected Received</SelectItem>
+                                            {returnItemStatusOptions.map((option) => (
+                                                <SelectItem
+                                                    key={option.value}
+                                                    value={option.value}
+                                                    disabled={!allowedReturnItemStatuses.includes(option.value)}
+                                                >
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -669,7 +734,7 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                     <Select
                                         value={returnData.rider?._id || ""}
                                         onValueChange={(val) => assignRiderMutation.mutate({ riderId: val })}
-                                        disabled={assignRiderMutation.isPending}
+                                        disabled={assignRiderMutation.isPending || isRefundAccepted}
                                     >
                                         <SelectTrigger className="bg-white border-gray-200">
                                             <SelectValue placeholder="Select Rider" />
@@ -694,15 +759,21 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                             disabled={updateReplacementStatusMutation.isPending}
                                         >
                                             <SelectTrigger className="bg-white border-gray-200">
-                                                <SelectValue placeholder="Select Status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="pending">Pending</SelectItem>
-                                                <SelectItem value="sent">Sent</SelectItem>
-                                                <SelectItem value="received">Received</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
+                                            <SelectValue placeholder="Select Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {replacementDeliveryStatusOptions.map((option) => (
+                                                <SelectItem
+                                                    key={option.value}
+                                                    value={option.value}
+                                                    disabled={!allowedReplacementDeliveryStatuses.includes(option.value)}
+                                                >
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                                 )}
                             </CardContent>
                         </Card>
