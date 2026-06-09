@@ -122,13 +122,18 @@ export default function ActiveRidersPage() {
                                                             {rider.name?.charAt(0) || "R"}
                                                         </AvatarFallback>
                                                     </Avatar>
-                                                    {/* Online dot */}
-                                                    <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-emerald-400 border-2 border-white rounded-full" />
+                                                    {/* Online/Offline dot */}
+                                                    <span className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 border-2 border-white rounded-full ${rider.isOnline ? 'bg-emerald-400' : 'bg-red-400'}`} />
                                                 </div>
                                                 <div className="min-w-0">
-                                                    <p className="text-[13px] font-semibold text-gray-800 truncate leading-tight">
-                                                        {rider.name}
-                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="text-[13px] font-semibold text-gray-800 truncate leading-tight">
+                                                            {rider.name}
+                                                        </p>
+                                                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-medium ${rider.isOnline ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                                            {rider.isOnline ? 'Online' : 'Offline'}
+                                                        </span>
+                                                    </div>
                                                     <div className="flex items-center gap-1 mt-0.5">
                                                         <Phone className="h-2.5 w-2.5 text-gray-400" />
                                                         <span className="text-[10px] text-gray-400">+91 {rider.phone}</span>
