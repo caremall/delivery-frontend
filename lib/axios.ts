@@ -39,7 +39,7 @@ axiosInstance.interceptors.response.use(
     (error) =>
         Promise.reject(
             (error.response && error.response.data) || "Something went wrong"
-        )
+        ) 
 );
 
 export default axiosInstance;
