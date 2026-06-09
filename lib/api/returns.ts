@@ -31,6 +31,7 @@ export interface ReturnRequest {
         name: string;
         phone: string;
         avatar?: string;
+        status?: string;
     };
 }
 

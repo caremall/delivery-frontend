@@ -334,14 +334,19 @@ export default function ReturnsTable() {
                                             <AvatarFallback>{rider.name?.charAt(0)}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-sm">{rider.name}</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-bold text-sm">{rider.name}</span>
+                                                <span className={`text-xs px-2 py-0.5 rounded ${rider.isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                    {rider.isOnline ? 'Online' : 'Offline'}
+                                                </span>
+                                            </div>
                                             <span className="text-xs text-gray-500">{rider.phone}</span>
                                         </div>
                                     </div>
                                     <Button
                                         size="sm"
                                         variant="outline"
-                                        disabled={assignMutation.isPending}
+                                        disabled={assignMutation.isPending || !rider.isOnline}
                                         onClick={() => assignMutation.mutate({ returnId: selectedReturnDoc?._id!, riderId: rider._id })}
                                     >
                                         {assignMutation.isPending ? "Assigning..." : "Assign"}
