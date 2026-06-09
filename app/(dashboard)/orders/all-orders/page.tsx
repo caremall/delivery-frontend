@@ -204,16 +204,22 @@ function RiderAssignSelect({
               riders.map((rider: any) => (
                 <DropdownMenuItem
                   key={rider._id}
-                  onClick={() => onSelect(rider._id)}
-                  className="flex items-center justify-between px-3 py-2 cursor-pointer focus:bg-red-50 focus:text-red-600 rounded-lg group"
+                  onClick={() => rider.isOnline && onSelect(rider._id)}
+                  disabled={!rider.isOnline}
+                  className="flex items-center justify-between px-3 py-2 cursor-pointer focus:bg-red-50 focus:text-red-600 rounded-lg group disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="flex flex-col min-w-0">
                     <span className="text-sm font-semibold truncate group-hover:text-red-600 transition-colors">{rider.name}</span>
                     <span className="text-[10px] text-gray-400">{rider.phone}</span>
                   </div>
-                  {currentRiderId === rider._id && (
-                    <div className="h-2 w-2 rounded-full bg-red-600" />
-                  )}
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] px-2 py-0.5 rounded ${rider.isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                      {rider.isOnline ? 'Online' : 'Offline'}
+                    </span>
+                    {currentRiderId === rider._id && (
+                      <div className="h-2 w-2 rounded-full bg-red-600" />
+                    )}
+                  </div>
                 </DropdownMenuItem>
               ))
             )}

@@ -741,12 +741,20 @@ export default function ReturnDetailsClient({ id }: ReturnDetailsClientProps) {
                                         </SelectTrigger>
                                         <SelectContent>
                                             {ridersData?.map((r: any) => (
-                                                <SelectItem key={r._id} value={r._id}>
-                                                    {r.name} ({r.phone})
+                                                <SelectItem key={r._id} value={r._id} disabled={!r.isOnline}>
+                                                    <div className="flex items-center justify-between w-full">
+                                                        <span>{r.name} ({r.phone})</span>
+                                                        <span className={`text-xs px-2 py-0.5 rounded ${r.isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                            {r.isOnline ? 'Online' : 'Offline'}
+                                                        </span>
+                                                    </div>
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Only online riders can be assigned
+                                    </p>
                                 </div>
 
                                 {/* Replacement Delivery Status */}
